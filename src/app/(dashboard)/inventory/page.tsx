@@ -1,6 +1,6 @@
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase/server"
-import { Box, ArrowUpRight, ArrowDownRight, PackagePlus, AlertTriangle, CircleDollarSign, Search, Filter, MoreVertical, BoxSelect, Syringe, Bug, Pill } from "lucide-react"
+import { Box, ArrowUpRight, ArrowDownRight, PackagePlus, AlertTriangle, CircleDollarSign, Search, Filter, MoreVertical, BoxSelect, Syringe, Bug, Pill, Users } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +8,7 @@ export default async function InventoryPage() {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser();
-    let avatarUrl = "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100&h=100"; // fallback
+    let avatarUrl: string | null = null;
 
     if (user && user.user_metadata?.avatar_url) {
         avatarUrl = user.user_metadata.avatar_url;
@@ -48,9 +48,13 @@ export default async function InventoryPage() {
                         <ArrowDownRight className="w-5 h-5" />
                         <span className="hidden sm:inline">Stok Masuk</span>
                     </button>
-                    <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
-                        <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
-                    </div>
+                    {avatarUrl ? (
+                        <img className="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="Profile" src={avatarUrl} />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
+                            <Users className="w-5 h-5" />
+                        </div>
+                    )}
                 </div>
             </header>
 

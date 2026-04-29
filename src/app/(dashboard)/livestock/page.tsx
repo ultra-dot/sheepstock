@@ -9,7 +9,7 @@ export default async function LivestockPage() {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser();
-    let avatarUrl = "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100&h=100"; // fallback
+    let avatarUrl: string | null = null;
 
     if (user && user.user_metadata?.avatar_url) {
         avatarUrl = user.user_metadata.avatar_url;

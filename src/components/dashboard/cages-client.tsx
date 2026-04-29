@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat } from "lucide-react"
+import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat, Users } from "lucide-react"
 import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch } from "@/app/actions/cages"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
@@ -33,7 +33,7 @@ export function CagesClient({
 }: {
     cagesWithStats: CageWithStats[],
     feedItems: FeedItem[],
-    avatarUrl: string
+    avatarUrl: string | null
 }) {
     const [searchQuery, setSearchQuery] = useState("")
     const [filterStatus, setFilterStatus] = useState<"Semua" | "Tersedia" | "Penuh">("Semua")
@@ -267,9 +267,13 @@ export function CagesClient({
                         <PlusCircle className="w-5 h-5" />
                         <span>Kandang Baru</span>
                     </button>
-                    <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
-                        <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
-                    </div>
+                    {avatarUrl ? (
+                        <img className="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="Profile" src={avatarUrl} />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
+                            <Users className="w-5 h-5" />
+                        </div>
+                    )}
                 </div>
             </header>
 
