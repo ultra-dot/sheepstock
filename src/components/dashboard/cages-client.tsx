@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat } from "lucide-react"
-import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch } from "@/app/actions/cages"
+import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch, updateCageCleaningStatus } from "@/app/actions/cages"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 
 export type CageWithStats = {
@@ -47,6 +47,7 @@ export function CagesClient({
     const [detailCage, setDetailCage] = useState<CageWithStats | null>(null)
 
     const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+    const [cleanMenuOpenId, setCleanMenuOpenId] = useState<string | null>(null)
     const [editCageData, setEditCageData] = useState<CageWithStats | null>(null)
 
     // Move Flock Additions
@@ -69,10 +70,10 @@ export function CagesClient({
 
     // Close dropdown menu if clicking outside (simple approach: close on any click outside the menu button)
     useEffect(() => {
-        const handleClickOutside = () => setMenuOpenId(null)
-        if (menuOpenId) document.addEventListener("click", handleClickOutside)
+        const handleClickOutside = () => { setMenuOpenId(null); setCleanMenuOpenId(null); }
+        if (menuOpenId || cleanMenuOpenId) document.addEventListener("click", handleClickOutside)
         return () => document.removeEventListener("click", handleClickOutside)
-    }, [menuOpenId])
+    }, [menuOpenId, cleanMenuOpenId])
 
     // Form states
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -115,6 +116,16 @@ export function CagesClient({
             alert("Gagal mencatat pemberian pakan")
         } finally {
             setIsSubmitting(false)
+        }
+    }
+
+    // Handler for Clean Status
+    const handleCleanStatus = async (cageId: string, isCleaned: boolean) => {
+        try {
+            await updateCageCleaningStatus(cageId, isCleaned);
+        } catch (error: any) {
+            console.error(error);
+            alert(error.message || "Gagal memperbarui status kebersihan");
         }
     }
 
@@ -238,23 +249,20 @@ export function CagesClient({
         <div className="flex flex-col h-screen overflow-hidden">
 
             {/* Header Actions */}
-            <header className="sticky top-0 h-20 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md border-b border-emerald-500/10 flex items-center justify-between px-8 shrink-0 z-10">
-                <div className="flex items-center gap-4">
+            <header className="sticky top-0 h-20 bg-white/30 dark:bg-slate-900/30 backdrop-blur-md border-b border-emerald-500/10 flex items-center justify-between px-4 md:px-8 shrink-0 z-10">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <SidebarTrigger />
-                    <div className="flex items-center gap-4 ml-2">
-                        <span className="text-emerald-500 bg-emerald-500/10 p-2 rounded-lg flex items-center justify-center">
-                            <Grid2x2 className="w-5 h-5" />
-                        </span>
-                        <h2 className="text-xl font-bold">Manajemen Kandang</h2>
+                    <div className="flex items-center gap-2 sm:gap-4 ml-0 sm:ml-2 min-w-0">
+                        <h2 className="text-base sm:text-xl font-bold truncate">Manajemen Kandang</h2>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
-                    <div className="relative hidden md:block">
+                <div className="flex items-center gap-2 md:gap-6 shrink-0">
+                    <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
                         <input
-                            className="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 w-64 outline-none shadow-sm"
-                            placeholder="Cari kandang..."
+                            className="pl-9 pr-3 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 w-28 sm:w-48 md:w-64 outline-none shadow-sm transition-all focus:w-40 sm:focus:w-56 md:focus:w-72"
+                            placeholder="Cari..."
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -262,10 +270,10 @@ export function CagesClient({
                     </div>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-500/90 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md"
+                        className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-500/90 text-white px-3 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shrink-0"
                     >
-                        <PlusCircle className="w-5 h-5" />
-                        <span>Kandang Baru</span>
+                        <PlusCircle className="w-5 h-5 shrink-0" />
+                        <span className="hidden sm:inline">Kandang Baru</span>
                     </button>
                     <div className="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
                         <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
@@ -351,11 +359,28 @@ export function CagesClient({
                                                 <p className="text-[10px] uppercase font-bold text-slate-400">Suhu</p>
                                                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{cage.temperature || '--'}°C</p>
                                             </div>
-                                            <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10">
-                                                <p className="text-[10px] uppercase font-bold text-slate-400">Kebersihan</p>
-                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">
-                                                    {cage.last_cleaned_at ? new Date(cage.last_cleaned_at).toLocaleDateString() : 'Belum'}
-                                                </p>
+                                            <div className="relative bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10 flex flex-col justify-between">
+                                                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Kebersihan</p>
+                                                <button 
+                                                    onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(cleanMenuOpenId === cage.id ? null : cage.id) }}
+                                                    className="flex items-center justify-between w-full mt-auto bg-white dark:bg-slate-800 border border-emerald-500/20 py-1.5 px-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors"
+                                                >
+                                                    <span className={`flex items-center gap-1.5 ${!cage.last_cleaned_at ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                                        <span className={`w-2 h-2 rounded-full ${!cage.last_cleaned_at ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
+                                                        {!cage.last_cleaned_at ? 'Kotor' : 'Bersih'}
+                                                    </span>
+                                                    <span className="text-[10px] text-slate-400">▼</span>
+                                                </button>
+                                                {cleanMenuOpenId === cage.id && (
+                                                    <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-20 overflow-hidden">
+                                                        <button onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(null); handleCleanStatus(cage.id, true) }} className="w-full text-left px-3 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Bersih
+                                                        </button>
+                                                        <button onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(null); handleCleanStatus(cage.id, false) }} className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2">
+                                                            <span className="w-2 h-2 rounded-full bg-rose-500"></span> Kotor
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
                                                 <p className="text-[10px] uppercase font-bold text-slate-400">Jantan</p>

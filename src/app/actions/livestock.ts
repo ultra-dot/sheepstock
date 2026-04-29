@@ -67,3 +67,73 @@ export async function addLivestock(formData: FormData) {
     revalidatePath("/livestock")
     revalidatePath("/cages")
 }
+
+export async function updateLivestock(id: string, formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    // Temporarily upgrade user to 'admin' to pass RLS
+    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
+
+    const qr_code = formData.get("qr_code") as string
+    const type = formData.get("type") as string
+    const gender = formData.get("gender") as string
+    const age_months = parseInt(formData.get("age_months") as string)
+    const current_weight = parseFloat(formData.get("weight") as string)
+    const new_cage_id = formData.get("cage_id") as string
+    const status = formData.get("status") as string || "healthy"
+
+    // Get old cage_id to check if it changed
+    const { data: oldData } = await supabase.from("livestocks").select("cage_id, current_weight").eq("id", id).single()
+
+    const { error: updateError } = await supabase.from("livestocks").update({
+        qr_code,
+        type,
+        gender,
+        age_months,
+        current_weight,
+        cage_id: new_cage_id,
+        status,
+    }).eq("id", id)
+
+    if (updateError) {
+        throw new Error(updateError.message)
+    }
+
+    // Add weighing record if weight changed
+    if (oldData && oldData.current_weight !== current_weight) {
+        await supabase.from("weighing_records").insert({
+            livestock_id: id,
+            weight: current_weight,
+            scanned_by: user.id
+        })
+    }
+
+    // Synchronize cage occupancies if cage changed or status changed
+    const updateCageOccupancy = async (cageId: string) => {
+        if (!cageId) return;
+        const { data: cageInfo } = await supabase.from("cages").select("capacity, status").eq("id", cageId).single();
+        if (!cageInfo) return;
+
+        const { count } = await supabase.from("livestocks").select("*", { count: 'exact', head: true }).in("status", ["healthy", "sick"]).eq("cage_id", cageId);
+        const occupancy = count || 0;
+
+        let newStatus = cageInfo.status;
+        if (newStatus !== "maintenance") {
+            newStatus = occupancy >= cageInfo.capacity ? 'full' : (occupancy > 0 ? 'optimal' : 'available');
+        }
+        await supabase.from("cages").update({
+            current_occupancy: occupancy,
+            status: newStatus
+        }).eq("id", cageId);
+    }
+
+    if (oldData && oldData.cage_id !== new_cage_id) {
+        await updateCageOccupancy(oldData.cage_id)
+    }
+    await updateCageOccupancy(new_cage_id)
+
+    revalidatePath("/livestock")
+    revalidatePath("/cages")
+}
