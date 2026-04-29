@@ -1,6 +1,4 @@
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { createClient } from "@/lib/supabase/server"
-import { BookOpen, QrCode, PlusCircle } from "lucide-react"
 import { LivestockClient } from "@/components/dashboard/livestock-client"
 
 export const dynamic = 'force-dynamic'

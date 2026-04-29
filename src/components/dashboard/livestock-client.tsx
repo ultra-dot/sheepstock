@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, Warehouse, Activity, Edit2, Eye, ChevronLeft, ChevronRight, BookOpen, QrCode, PlusCircle, Users } from "lucide-react"
+import { Search, Warehouse, Activity, Edit2, ChevronLeft, ChevronRight, BookOpen, QrCode, PlusCircle, Users } from "lucide-react"
 
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { addLivestock, updateLivestock } from "@/app/actions/livestock"

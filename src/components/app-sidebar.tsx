@@ -58,14 +58,12 @@ export function AppSidebar() {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                // Priority: metadata full_name > profile name (if not default) > fallback
-                if (user.user_metadata?.full_name) {
+                // Priority: profile name (if not default) > metadata full_name > fallback
+                const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
+                if (profile?.name && profile.name !== "New Staff") {
+                    setUserName(profile.name);
+                } else if (user.user_metadata?.full_name) {
                     setUserName(user.user_metadata.full_name);
-                } else {
-                    const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-                    if (profile?.name && profile.name !== "New Staff") {
-                        setUserName(profile.name);
-                    }
                 }
                 if (user.user_metadata?.avatar_url) setAvatarUrl(user.user_metadata.avatar_url);
             }

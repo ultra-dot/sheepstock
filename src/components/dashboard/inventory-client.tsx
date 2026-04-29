@@ -15,7 +15,7 @@ export function InventoryClient({
     totalEstValue
 }: {
     items: InventoryItem[],
-    avatarUrl: string,
+    avatarUrl: string | null,
     totalItems: number,
     lowStockItems: number,
     totalEstValue: string
@@ -79,9 +79,15 @@ export function InventoryClient({
                         <ArrowDownRight className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Stok Masuk</span>
                     </button>
-                    <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
-                        <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
-                    </div>
+                    {avatarUrl ? (
+                        <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
+                            <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
+                        </div>
+                    ) : (
+                        <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex text-slate-400">
+                            <Box className="w-5 h-5" />
+                        </div>
+                    )}
                 </div>
             </header>
 

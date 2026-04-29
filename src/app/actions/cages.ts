@@ -5,12 +5,8 @@ import { revalidatePath } from "next/cache"
 
 export async function createCage(formData: FormData) {
     const supabase = await createClient()
-    // 1. Get current user
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
-
-    // 2. Temporarily upgrade user to 'admin' to pass RLS policies for cages & inventory
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
 
     const name = formData.get("name") as string
     const capacity = parseInt(formData.get("capacity") as string)
@@ -39,9 +35,8 @@ export async function createCage(formData: FormData) {
 export async function deleteCage(id: string) {
     const supabase = await createClient()
 
-    // Temporarily upgrade user to 'admin' to pass RLS
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
+    if (!user) throw new Error("Unauthorized")
 
     // Check if occupied
     const { data: cage } = await supabase.from("cages").select("current_occupancy").eq("id", id).single()
@@ -62,9 +57,6 @@ export async function updateCage(id: string, formData: FormData) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
-
-    // Temporarily upgrade user to 'admin' to pass RLS
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
 
     const name = formData.get("name") as string
     const capacity = parseInt(formData.get("capacity") as string)
@@ -92,9 +84,6 @@ export async function moveLivestockBatch(targetCageId: string, sourceCageId: str
     if (!user) throw new Error("Unauthorized")
 
     if (!livestockIds || livestockIds.length === 0) throw new Error("Tidak ada ternak yang dipilih")
-
-    // Temporarily upgrade user to 'admin' to pass RLS
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
 
     // 1. Move selected livestocks to target cage
     const { error: moveError } = await supabase.from("livestocks")
@@ -158,13 +147,12 @@ export async function feedCage(formData: FormData) {
 
     if (feedError) throw new Error(feedError.message)
 
-    // 3. Deduct from inventory (Using primitive approach for now: fetch, then update)
-    // In a real production app, this should ideally be an RPC call for atomicity
-    const { data: item } = await supabase.from("inventory_items").select("current_stock").eq("id", item_id).single()
+    // 3. Deduct from inventory (scoped to current user's items)
+    const { data: item } = await supabase.from("inventory_items").select("current_stock").eq("id", item_id).eq("user_id", user.id).single()
 
     if (item) {
         const newStock = Math.max(0, item.current_stock - quantity_given)
-        await supabase.from("inventory_items").update({ current_stock: newStock }).eq("id", item_id)
+        await supabase.from("inventory_items").update({ current_stock: newStock }).eq("id", item_id).eq("user_id", user.id)
     }
 
     revalidatePath("/cages")
@@ -175,9 +163,6 @@ export async function updateCageCleaningStatus(id: string, isCleaned: boolean) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
-
-    // Temporarily upgrade user to 'admin' to pass RLS
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
 
     const last_cleaned_at = isCleaned ? new Date().toISOString() : null;
 

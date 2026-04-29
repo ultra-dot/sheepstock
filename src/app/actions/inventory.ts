@@ -8,9 +8,6 @@ export async function updateStock(itemId: string, quantity: number, type: 'in' |
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
-    // Temporarily upgrade user to 'admin' to pass RLS
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
-
     if (!itemId) throw new Error("ID barang tidak valid")
     if (quantity <= 0) throw new Error("Jumlah harus lebih dari 0")
 

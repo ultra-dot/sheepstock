@@ -8,9 +8,6 @@ export async function addLivestock(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
-    // Temporarily upgrade user to 'admin' to pass RLS (simulating elevated privileges for staff on strictly RLS guarded operations)
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
-
     const qr_code = formData.get("qr_code") as string
     const type = formData.get("type") as string
     const gender = formData.get("gender") as string
@@ -75,9 +72,6 @@ export async function updateLivestock(id: string, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
-    // Temporarily upgrade user to 'admin' to pass RLS
-    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
-
     const qr_code = formData.get("qr_code") as string
     const type = formData.get("type") as string
     const gender = formData.get("gender") as string
@@ -108,7 +102,8 @@ export async function updateLivestock(id: string, formData: FormData) {
         await supabase.from("weighing_records").insert({
             livestock_id: id,
             weight: current_weight,
-            scanned_by: user.id
+            scanned_by: user.id,
+            user_id: user.id
         })
     }
 
