@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Box, ArrowUpRight, ArrowDownRight, Search, Filter, MoreVertical, BoxSelect, Syringe, Bug, Pill, X } from "lucide-react"
+import { Box, ArrowUpRight, ArrowDownRight, Search, Filter, MoreVertical, BoxSelect, Syringe, Bug, Pill, X, PlusCircle, Users, Trash2 } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { updateStock } from "@/app/actions/inventory"
+import { updateStock, addInventoryItem, deleteInventoryItem } from "@/app/actions/inventory"
 
 type InventoryItem = any // type this properly later
 
@@ -22,6 +22,7 @@ export function InventoryClient({
 }) {
     const [isStockInModalOpen, setIsStockInModalOpen] = useState(false)
     const [isStockOutModalOpen, setIsStockOutModalOpen] = useState(false)
+    const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleStockInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -60,6 +61,32 @@ export function InventoryClient({
         }
     }
 
+    const handleAddItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setIsSubmitting(true)
+        try {
+            await addInventoryItem(new FormData(e.currentTarget))
+            setIsAddItemModalOpen(false)
+            alert("Barang baru berhasil ditambahkan!")
+        } catch (error: any) {
+            console.error(error)
+            alert(error.message || "Gagal menambahkan barang")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleDeleteItem = async (itemId: string, itemName: string) => {
+        if (!confirm(`Hapus "${itemName}" dari inventori?`)) return
+        try {
+            await deleteInventoryItem(itemId)
+            alert("Barang berhasil dihapus!")
+        } catch (error: any) {
+            console.error(error)
+            alert(error.message || "Gagal menghapus barang")
+        }
+    }
+
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
             {/* Header */}
@@ -75,17 +102,21 @@ export function InventoryClient({
                         <ArrowUpRight className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Stok Keluar</span>
                     </button>
-                    <button onClick={() => setIsStockInModalOpen(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all font-semibold text-sm shadow-md shadow-emerald-500/20 shrink-0">
+                    <button onClick={() => setIsStockInModalOpen(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 border border-emerald-500/20 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-semibold text-sm shadow-sm shrink-0">
                         <ArrowDownRight className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Stok Masuk</span>
+                    </button>
+                    <button onClick={() => setIsAddItemModalOpen(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all font-semibold text-sm shadow-md shadow-emerald-500/20 shrink-0">
+                        <PlusCircle className="w-5 h-5 shrink-0" />
+                        <span className="hidden sm:inline">Tambah Item</span>
                     </button>
                     {avatarUrl ? (
                         <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
                             <img className="w-full h-full object-cover" alt="User avatar" src={avatarUrl} />
                         </div>
                     ) : (
-                        <div className="h-10 w-10 ml-2 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex text-slate-400">
-                            <Box className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
+                            <Users className="w-5 h-5" />
                         </div>
                     )}
                 </div>
@@ -211,8 +242,8 @@ export function InventoryClient({
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <button className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-600 transition-all">
-                                                        <MoreVertical className="w-4 h-4" />
+                                                    <button onClick={() => handleDeleteItem(item.id, item.name)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 transition-all">
+                                                        <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -296,6 +327,69 @@ export function InventoryClient({
                             <div className="pt-4">
                                 <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/20 transition-all disabled:opacity-50">
                                     {isSubmitting ? 'Menyimpan...' : 'Simpan Stok Keluar'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Tambah Item Baru Modal */}
+            {isAddItemModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
+                            <div>
+                                <h3 className="text-xl font-bold">Tambah Item Baru</h3>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Daftarkan barang inventaris baru ke sistem.</p>
+                            </div>
+                            <button onClick={() => setIsAddItemModalOpen(false)} className="w-8 h-8 flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full hover:bg-slate-200">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleAddItemSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Barang *</label>
+                                <input required name="name" type="text" placeholder="Contoh: Rumput Gajah" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori *</label>
+                                    <select required name="type" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="feed">Pakan</option>
+                                        <option value="medicine">Obat</option>
+                                        <option value="vaccine">Vaksin</option>
+                                        <option value="equipment">Peralatan</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Satuan *</label>
+                                    <select required name="unit" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="kg">Kg</option>
+                                        <option value="liter">Liter</option>
+                                        <option value="pcs">Pcs</option>
+                                        <option value="botol">Botol</option>
+                                        <option value="sachet">Sachet</option>
+                                        <option value="karung">Karung</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Stok Awal *</label>
+                                    <input required name="current_stock" type="number" step="0.1" min="0" placeholder="Misal: 100" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Batas Minimum *</label>
+                                    <input required name="min_stock_alert" type="number" step="0.1" min="0" placeholder="Misal: 10" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                </div>
+                            </div>
+                            <div className="pt-4 flex gap-3 shrink-0">
+                                <button type="button" onClick={() => setIsAddItemModalOpen(false)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                    Batal
+                                </button>
+                                <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50">
+                                    {isSubmitting ? 'Menyimpan...' : 'Simpan Item'}
                                 </button>
                             </div>
                         </form>

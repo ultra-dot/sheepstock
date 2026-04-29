@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/client"
 const items = [
     {
         title: "Dashboard",
-        url: "/",
+        url: "/dashboard",
         icon: LayoutDashboard,
     },
     {
@@ -93,8 +93,8 @@ export function AppSidebar() {
             {/* Header */}
             <SidebarHeader className="p-6">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-                        <PawPrint className="w-5 h-5" />
+                    <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-sm border border-emerald-500/10 shrink-0">
+                        <img src="/assets/image/logo-sheepstock-green.png" alt="SheepStock Logo" className="w-full h-full object-cover" />
                     </div>
                     <div>
                         <h1 className="font-bold text-lg leading-none">SheepStock</h1>
