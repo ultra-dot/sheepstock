@@ -58,22 +58,31 @@ export function AppSidebar() {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-                if (profile?.name) setUserName(profile.name);
+                // Priority: metadata full_name > profile name (if not default) > fallback
+                if (user.user_metadata?.full_name) {
+                    setUserName(user.user_metadata.full_name);
+                } else {
+                    const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
+                    if (profile?.name && profile.name !== "New Staff") {
+                        setUserName(profile.name);
+                    }
+                }
                 if (user.user_metadata?.avatar_url) setAvatarUrl(user.user_metadata.avatar_url);
             }
         };
 
         fetchUser();
 
-        // Listen for auth/metadata changes to keep avatar synced
-        const { data: { subscription } } = createClient().auth.onAuthStateChange((event, session) => {
+        // Listen for auth/metadata changes to keep name & avatar synced
+        const supabase = createClient();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (session?.user) {
+                if (session.user.user_metadata?.full_name) {
+                    setUserName(session.user.user_metadata.full_name);
+                }
                 if (session.user.user_metadata?.avatar_url) {
                     setAvatarUrl(session.user.user_metadata.avatar_url);
                 }
-                // Re-fetch profile on change to grab fresh name
-                fetchUser();
             }
         });
 

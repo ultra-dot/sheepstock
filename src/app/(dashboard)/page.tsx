@@ -15,11 +15,14 @@ export default async function Dashboard() {
 
   const { data: { user } } = await supabase.auth.getUser();
   let userName = "Admin";
-  let avatarUrl = "https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&q=80&w=100&h=100"; // fallback
+  let avatarUrl: string | null = null; // Remove hardcoded fallback
 
   if (user) {
     const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
-    if (profile?.name) userName = profile.name;
+    if (profile?.name && profile.name !== "New Staff") userName = profile.name;
+    // Fallback to user_metadata in case profile still has the DB default
+    else if (user.user_metadata?.full_name) userName = user.user_metadata.full_name;
+    
     if (user.user_metadata?.avatar_url) avatarUrl = user.user_metadata.avatar_url;
   }
 
@@ -73,7 +76,6 @@ export default async function Dashboard() {
         <div className="flex items-center gap-4">
           <button className="relative w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
             <Bell className="w-5 h-5" />
-            <span className="absolute top-2 right-2 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900">3</span>
           </button>
           <button className="hidden sm:flex w-10 h-10 items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
             <HelpCircle className="w-5 h-5" />
@@ -115,10 +117,12 @@ export default async function Dashboard() {
             </div>
             <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Total Populasi</p>
             <h3 className="text-3xl font-black text-slate-900 dark:text-white mb-2">{safeTotal} <span className="text-base font-bold text-slate-400">Ekor</span></h3>
-            <div className="flex items-center gap-1 text-emerald-600 font-bold text-xs bg-emerald-50 dark:bg-emerald-950/30 w-fit px-2 py-0.5 rounded-lg">
-              <TrendingUp className="w-4 h-4" />
-              <span>+12% bln ini</span>
-            </div>
+            {safeTotal > 0 && (
+              <div className="flex items-center gap-1 text-emerald-600 font-bold text-xs bg-emerald-50 dark:bg-emerald-950/30 w-fit px-2 py-0.5 rounded-lg">
+                <TrendingUp className="w-4 h-4" />
+                <span>Data tersedia</span>
+              </div>
+            )}
           </div>
 
           <div className="glass-card p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:shadow-xl hover:shadow-emerald-500/5 transition-all">
@@ -214,36 +218,24 @@ export default async function Dashboard() {
             <button className="text-emerald-500 text-xs font-bold hover:underline">Lihat Semua</button>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            <div className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-              <div className="w-8 h-8 shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-500">
-                <PlusCircle className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">5 Ekor Domba Garut ditambahkan</p>
-                <p className="text-[10px] text-slate-400">Hari ini, 08:45 • Admin MitraTani</p>
-              </div>
-              <span className="text-xs font-bold text-slate-400">Knd 04</span>
-            </div>
-            <div className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-              <div className="w-8 h-8 shrink-0 rounded-full bg-amber-100 dark:bg-amber-950 flex items-center justify-center text-amber-600">
-                <Syringe className="w-4 h-4" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-bold">Vaksinasi Rutin Kandang 02 Selesai</p>
-                <p className="text-[10px] text-slate-400">Hari ini, 07:15 • Petugas Kesehatan</p>
-              </div>
-              <span className="text-xs font-bold text-slate-400">Knd 02</span>
-            </div>
-            {lowStockItems.length > 0 && (
+            {lowStockItems.length > 0 ? (
               <div className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                 <div className="w-8 h-8 shrink-0 rounded-full bg-rose-100 dark:bg-rose-950 flex items-center justify-center text-rose-600">
                   <AlertCircle className="w-4 h-4" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-bold">Peringatan Stok Menipis</p>
-                  <p className="text-[10px] text-slate-400 text-rose-500">{lowStockItems.map(i => i.name).join(', ')} kurang dari batas</p>
+                  <p className="text-[10px] text-rose-500">{lowStockItems.map(i => i.name).join(', ')} kurang dari batas</p>
                 </div>
                 <span className="text-xs font-bold text-rose-500">CRITICAL</span>
+              </div>
+            ) : (
+              <div className="px-5 py-8 flex flex-col items-center justify-center text-center">
+                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+                  <PlusCircle className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-semibold text-slate-500">Belum ada aktivitas</p>
+                <p className="text-xs text-slate-400 mt-1">Aktivitas akan muncul saat Anda mulai mengelola peternakan.</p>
               </div>
             )}
           </div>

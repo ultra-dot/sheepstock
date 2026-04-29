@@ -33,9 +33,18 @@ export default function SettingsPage() {
 
                 // Fetch profile data
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+                
+                let displayName = "Tanpa Nama";
+                if (profile?.name && profile.name !== "New Staff") {
+                    displayName = profile.name;
+                } else if (user.user_metadata?.full_name) {
+                    displayName = user.user_metadata.full_name;
+                }
+
+                setUserName(displayName);
+                setEditName(displayName);
+                
                 if (profile) {
-                    setUserName(profile.name || "Tanpa Nama");
-                    setEditName(profile.name || "");
                     setUserRole(profile.role === 'admin' ? 'Administrator' : 'Staf');
                 }
             } else {
@@ -52,12 +61,21 @@ export default function SettingsPage() {
         try {
             setIsSavingProfile(true);
             const supabase = createClient();
-            const { error } = await supabase
+            
+            // 1. Update profiles table
+            const { error: profileError } = await supabase
                 .from('profiles')
                 .update({ name: editName })
                 .eq('id', userId);
 
-            if (error) throw error;
+            if (profileError) throw profileError;
+
+            // 2. Update auth metadata to keep it in sync
+            const { error: authError } = await supabase.auth.updateUser({
+                data: { full_name: editName }
+            });
+
+            if (authError) throw authError;
 
             setUserName(editName);
             setIsEditingProfile(false);

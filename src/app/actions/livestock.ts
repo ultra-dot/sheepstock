@@ -34,7 +34,8 @@ export async function addLivestock(formData: FormData) {
         current_weight: initial_weight,
         cage_id,
         status,
-        entry_date: new Date().toISOString()
+        entry_date: new Date().toISOString(),
+        user_id: user.id
     }).select().single()
 
     if (insertError) {
@@ -45,7 +46,8 @@ export async function addLivestock(formData: FormData) {
     await supabase.from("weighing_records").insert({
         livestock_id: newLivestock.id,
         weight: initial_weight,
-        scanned_by: user.id
+        scanned_by: user.id,
+        user_id: user.id
     })
 
     // Synchronize Target Cage Occupancy

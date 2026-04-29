@@ -25,7 +25,8 @@ export async function createCage(formData: FormData) {
         capacity,
         current_occupancy: 0,
         status,
-        temperature
+        temperature,
+        user_id: user.id
     })
 
     if (error) {
@@ -151,7 +152,8 @@ export async function feedCage(formData: FormData) {
         cage_id,
         item_id,
         quantity_given,
-        recorded_by: user.id
+        recorded_by: user.id,
+        user_id: user.id
     })
 
     if (feedError) throw new Error(feedError.message)
