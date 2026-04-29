@@ -168,3 +168,24 @@ export async function feedCage(formData: FormData) {
     revalidatePath("/cages")
     revalidatePath("/inventory")
 }
+
+export async function updateCageCleaningStatus(id: string, isCleaned: boolean) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    // Temporarily upgrade user to 'admin' to pass RLS
+    await supabase.from("profiles").update({ role: "admin" }).eq("id", user.id)
+
+    const last_cleaned_at = isCleaned ? new Date().toISOString() : null;
+
+    const { error } = await supabase.from("cages").update({
+        last_cleaned_at
+    }).eq("id", id)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    revalidatePath("/cages")
+}

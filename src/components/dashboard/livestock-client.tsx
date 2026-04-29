@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Search, Warehouse, Activity, Eye, ChevronLeft, ChevronRight, BookOpen, QrCode, PlusCircle } from "lucide-react"
+import { Search, Warehouse, Activity, Edit2, ChevronLeft, ChevronRight, BookOpen, QrCode, PlusCircle } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { addLivestock } from "@/app/actions/livestock"
+import { addLivestock, updateLivestock } from "@/app/actions/livestock"
 
 type Livestock = any // Ideally type this properly, but any works for now based on original file
 
@@ -20,6 +20,7 @@ export function LivestockClient({
 }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [detailLivestock, setDetailLivestock] = useState<Livestock | null>(null)
     const [limit, setLimit] = useState<number | "all">(10)
     const [page, setPage] = useState(1)
     const [searchQuery, setSearchQuery] = useState("")
@@ -54,6 +55,22 @@ export function LivestockClient({
         setPage(1)
     }
 
+    const handleEditSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (!detailLivestock) return;
+        setIsSubmitting(true)
+        try {
+            await updateLivestock(detailLivestock.id, new FormData(e.currentTarget))
+            setDetailLivestock(null)
+            alert("Berhasil memperbarui data ternak!")
+        } catch (error: any) {
+            console.error(error)
+            alert(error.message || "Gagal memperbarui data ternak")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
     const handleAddSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
@@ -72,21 +89,20 @@ export function LivestockClient({
     return (
         <div className="flex flex-col h-screen overflow-hidden">
             {/* Header */}
-            <header className="h-20 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-8 flex items-center justify-between sticky top-0 z-10 shrink-0">
-                <div className="flex items-center gap-4">
+            <header className="h-20 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-4 md:px-8 flex items-center justify-between sticky top-0 z-10 shrink-0">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <SidebarTrigger />
-                    <div className="flex items-center gap-3 ml-2">
-                        <BookOpen className="text-emerald-500 w-6 h-6" />
-                        <h2 className="text-xl font-bold tracking-tight">Buku Pintar Ternak</h2>
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
+                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Inventori Ternak</h2>
                     </div>
                 </div>
-                <div className="flex gap-3 items-center">
-                    <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 border border-emerald-500/20 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-semibold text-sm shadow-sm">
-                        <QrCode className="w-5 h-5" />
-                        Scan QR
+                <div className="flex gap-2 sm:gap-3 items-center shrink-0">
+                    <button className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-800 border border-emerald-500/20 text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-all font-semibold text-sm shadow-sm shrink-0">
+                        <QrCode className="w-5 h-5 shrink-0" />
+                        <span className="hidden sm:inline">Scan QR</span>
                     </button>
-                    <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all font-semibold text-sm shadow-md shadow-emerald-500/20">
-                        <PlusCircle className="w-5 h-5" />
+                    <button onClick={() => setIsAddModalOpen(true)} className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all font-semibold text-sm shadow-md shadow-emerald-500/20 shrink-0">
+                        <PlusCircle className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Tambah Ternak</span>
                     </button>
                     <div className="h-10 w-10 ml-1 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-emerald-500/20 hidden sm:flex">
@@ -218,8 +234,8 @@ export function LivestockClient({
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-center">
-                                                        <button className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-600 transition-all">
-                                                            <Eye className="w-4 h-4" />
+                                                        <button onClick={() => setDetailLivestock(animal)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-600 transition-all">
+                                                            <Edit2 className="w-4 h-4" />
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -348,6 +364,83 @@ export function LivestockClient({
                                     </button>
                                     <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50">
                                         {isSubmitting ? 'Menyimpan...' : 'Simpan Ternak'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* Edit Modal */}
+                {detailLivestock && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+                            <div className="p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                                <h3 className="text-xl font-bold">Edit Data Ternak</h3>
+                                <p className="text-sm text-slate-500 font-medium mt-1">Ubah data ternak yang dipilih.</p>
+                            </div>
+                            <form onSubmit={handleEditSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">QR Code / ID *</label>
+                                        <input required name="qr_code" type="text" defaultValue={detailLivestock.qr_code} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-mono" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tipe *</label>
+                                        <select required name="type" defaultValue={detailLivestock.type} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                            <option value="domba">Domba</option>
+                                            <option value="kambing">Kambing</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jenis Kelamin *</label>
+                                        <select required name="gender" defaultValue={detailLivestock.gender} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                            <option value="male">Jantan</option>
+                                            <option value="female">Betina (Breeding)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Umur (Bulan) *</label>
+                                        <input required name="age_months" type="number" min="1" defaultValue={detailLivestock.age_months} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Berat Saat Ini (Kg) *</label>
+                                        <input required name="weight" type="number" step="0.1" min="1" defaultValue={detailLivestock.current_weight} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status *</label>
+                                        <select required name="status" defaultValue={detailLivestock.status} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                            <option value="healthy">Sehat</option>
+                                            <option value="sick">Sakit (Karantina)</option>
+                                            <option value="sold">Terjual</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kandang Penempatan *</label>
+                                    <select required name="cage_id" defaultValue={detailLivestock.cage_id} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="" disabled>-- Pilih Kandang --</option>
+                                        {cages.map(cage => (
+                                            <option key={cage.id} value={cage.id}>
+                                                {cage.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="pt-4 flex gap-3 shrink-0">
+                                    <button type="button" onClick={() => setDetailLivestock(null)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50">
+                                        {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                                     </button>
                                 </div>
                             </form>
