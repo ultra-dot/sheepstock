@@ -97,6 +97,61 @@ export async function updateLivestock(id: string, formData: FormData) {
         throw new Error(updateError.message)
     }
 
+    // Sync health records based on status
+    if (status === 'sick') {
+        const illness = formData.get("illness_description") as string;
+        const treatment = formData.get("treatment") as string;
+        const medicine_id = formData.get("medicine_id") as string;
+        const medicine_qty = parseFloat(formData.get("medicine_qty") as string);
+        const health_status = formData.get("health_status") as string || "karantina";
+
+        // Always create a new health record ticket if illness is provided
+        if (illness) {
+            const { error: insertErr } = await supabase.from("health_records").insert({
+                livestock_id: id,
+                date: new Date().toISOString().split('T')[0],
+                illness_description: illness,
+                treatment,
+                item_used_id: medicine_id || null,
+                medicine_qty: isNaN(medicine_qty) ? null : medicine_qty,
+                status: health_status,
+                recorded_by: user.id,
+                user_id: user.id
+            });
+
+            if (insertErr) {
+                console.error("[Livestock→Health Sync] Insert error:", insertErr.message);
+            }
+
+            // Auto-deduct medicine stock if medicine was used
+            if (medicine_id && !isNaN(medicine_qty) && medicine_qty > 0) {
+                const { data: item } = await supabase
+                    .from("inventory_items")
+                    .select("current_stock")
+                    .eq("id", medicine_id)
+                    .single();
+
+                if (item) {
+                    const newStock = item.current_stock - medicine_qty;
+                    if (newStock >= 0) {
+                        await supabase
+                            .from("inventory_items")
+                            .update({ current_stock: newStock })
+                            .eq("id", medicine_id);
+                    }
+                }
+            }
+        }
+    } else if (status === 'healthy') {
+        // Resolve all active health records for this livestock
+        await supabase.from("health_records").update({
+            status: 'selesai',
+            resolved_at: new Date().toISOString()
+        })
+            .eq("livestock_id", id)
+            .in("status", ["karantina", "pemulihan"]);
+    }
+
     // Add weighing record if weight changed
     if (oldData && oldData.current_weight !== current_weight) {
         await supabase.from("weighing_records").insert({
@@ -133,4 +188,68 @@ export async function updateLivestock(id: string, formData: FormData) {
 
     revalidatePath("/livestock")
     revalidatePath("/cages")
+    revalidatePath("/health")
+}
+
+export async function deleteLivestock(id: string, cageId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    // Get current record to know which cage it belongs to if cageId isn't passed reliably
+    const { data: livestock } = await supabase.from("livestocks").select("cage_id").eq("id", id).single()
+
+    const { error } = await supabase.from("livestocks").delete().eq("id", id).eq("user_id", user.id)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    // Update cage occupancy
+    const targetCageId = livestock?.cage_id || cageId
+    if (targetCageId) {
+        const { data: cageInfo } = await supabase.from("cages").select("capacity, status").eq("id", targetCageId).single();
+        if (cageInfo) {
+            const { count } = await supabase.from("livestocks").select("*", { count: 'exact', head: true }).in("status", ["healthy", "sick"]).eq("cage_id", targetCageId);
+            const occupancy = count || 0;
+
+            let newStatus = cageInfo.status;
+            if (newStatus !== "maintenance") {
+                newStatus = occupancy >= cageInfo.capacity ? 'full' : (occupancy > 0 ? 'optimal' : 'available');
+            }
+            await supabase.from("cages").update({
+                current_occupancy: occupancy,
+                status: newStatus
+            }).eq("id", targetCageId);
+        }
+    }
+
+    revalidatePath("/livestock")
+    revalidatePath("/cages")
+}
+
+export async function getLivestockHistory(livestockId: string) {
+    const supabase = await createClient()
+
+    // Fetch health records
+    const { data: healthRecords } = await supabase
+        .from("health_records")
+        .select(`
+            *,
+            inventory_items ( name )
+        `)
+        .eq("livestock_id", livestockId)
+        .order("date", { ascending: false })
+
+    // Fetch weighing records
+    const { data: weighingRecords } = await supabase
+        .from("weighing_records")
+        .select("*")
+        .eq("livestock_id", livestockId)
+        .order("recorded_at", { ascending: false })
+
+    return {
+        healthRecords: healthRecords || [],
+        weighingRecords: weighingRecords || []
+    }
 }

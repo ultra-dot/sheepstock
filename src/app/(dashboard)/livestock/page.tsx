@@ -41,10 +41,18 @@ export default async function LivestockPage() {
     // Siap Panen (e.g. weight >= 35 kg rule of thumb)
     const readyToHarvest = livestocks.filter(l => l.current_weight >= 35).length;
 
+    // Fetch medicine/obat items for the edit form dropdown
+    const { data: medicines } = await supabase
+        .from("inventory_items")
+        .select("id, name, current_stock, unit")
+        .in("type", ["obat", "medicine", "vaksin", "vaccine"])
+        .order('name')
+
     return (
         <LivestockClient
             livestocks={livestocks}
             cages={cages || []}
+            medicines={medicines || []}
             avatarUrl={avatarUrl}
             stats={{ totalAnimals, healthyPercentage, avgWeight, readyToHarvest }}
         />

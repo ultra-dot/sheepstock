@@ -1,3 +1,4 @@
+import React from "react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -57,6 +58,64 @@ export default async function Dashboard() {
   const lowStockItems = inventoryItems?.filter(
     (item) => item.current_stock <= item.min_stock_alert
   ) || [];
+
+  // Fetch recent health records
+  const { data: recentHealth } = await supabase
+    .from("health_records")
+    .select("illness_description, status, date, livestocks ( qr_code )")
+    .order("date", { ascending: false })
+    .limit(5);
+
+  // Fetch recent weighing records
+  const { data: recentWeighing } = await supabase
+    .from("weighing_records")
+    .select("weight, recorded_at, livestocks ( qr_code )")
+    .order("recorded_at", { ascending: false })
+    .limit(3);
+
+  // Build unified activity log
+  type Activity = { title: string; desc: string; time: string; color: string; icon: React.ReactNode; ts: number };
+  const activities: Activity[] = [];
+
+  // Low stock alerts
+  if (lowStockItems.length > 0) {
+    activities.push({
+      title: "Stok Menipis",
+      desc: lowStockItems.map(i => i.name).join(', ') + " di bawah batas",
+      time: "Sekarang",
+      color: "bg-rose-100 dark:bg-rose-950 text-rose-600",
+      icon: <AlertCircle className="w-4 h-4" />,
+      ts: Date.now()
+    });
+  }
+
+  // Health records
+  for (const hr of (recentHealth || [])) {
+    const statusLabel = hr.status === 'selesai' ? 'Sembuh' : hr.status === 'karantina' ? 'Karantina' : 'Pemulihan';
+    activities.push({
+      title: `${statusLabel}: ${(hr.livestocks as any)?.qr_code || 'Ternak'}`,
+      desc: hr.illness_description,
+      time: new Date(hr.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+      color: hr.status === 'selesai' ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-600" : "bg-amber-100 dark:bg-amber-950 text-amber-600",
+      icon: <Syringe className="w-4 h-4" />,
+      ts: new Date(hr.date).getTime()
+    });
+  }
+
+  // Weighing records
+  for (const wr of (recentWeighing || [])) {
+    activities.push({
+      title: `Timbang: ${(wr.livestocks as any)?.qr_code || 'Ternak'}`,
+      desc: `Berat tercatat ${wr.weight} Kg`,
+      time: new Date(wr.recorded_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }),
+      color: "bg-blue-100 dark:bg-blue-950 text-blue-600",
+      icon: <TrendingUp className="w-4 h-4" />,
+      ts: new Date(wr.recorded_at).getTime()
+    });
+  }
+
+  // Sort by time descending, limit to 8
+  const recentActivities = activities.sort((a, b) => b.ts - a.ts).slice(0, 8);
 
   return (
     <>
@@ -217,21 +276,9 @@ export default async function Dashboard() {
         <div className="glass-card rounded-2xl overflow-hidden shadow-sm">
           <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/50">
             <h4 className="text-base font-bold">Log Aktivitas Terakhir</h4>
-            <button className="text-emerald-500 text-xs font-bold hover:underline">Lihat Semua</button>
           </div>
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {lowStockItems.length > 0 ? (
-              <div className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                <div className="w-8 h-8 shrink-0 rounded-full bg-rose-100 dark:bg-rose-950 flex items-center justify-center text-rose-600">
-                  <AlertCircle className="w-4 h-4" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-bold">Peringatan Stok Menipis</p>
-                  <p className="text-[10px] text-rose-500">{lowStockItems.map(i => i.name).join(', ')} kurang dari batas</p>
-                </div>
-                <span className="text-xs font-bold text-rose-500">CRITICAL</span>
-              </div>
-            ) : (
+            {recentActivities.length === 0 ? (
               <div className="px-5 py-8 flex flex-col items-center justify-center text-center">
                 <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
                   <PlusCircle className="w-5 h-5" />
@@ -239,6 +286,19 @@ export default async function Dashboard() {
                 <p className="text-sm font-semibold text-slate-500">Belum ada aktivitas</p>
                 <p className="text-xs text-slate-400 mt-1">Aktivitas akan muncul saat Anda mulai mengelola peternakan.</p>
               </div>
+            ) : (
+              recentActivities.map((act, i) => (
+                <div key={i} className="px-5 py-3 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${act.color}`}>
+                    {act.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{act.title}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{act.desc}</p>
+                  </div>
+                  <span className="text-[10px] font-medium text-slate-400 whitespace-nowrap">{act.time}</span>
+                </div>
+              ))
             )}
           </div>
         </div>

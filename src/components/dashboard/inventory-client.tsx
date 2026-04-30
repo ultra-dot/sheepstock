@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Box, ArrowUpRight, ArrowDownRight, Search, Filter, MoreVertical, Wheat, Syringe, Wrench, Pill, X, PlusCircle, Users, Trash2 } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { updateStock, addInventoryItem, deleteInventoryItem } from "@/app/actions/inventory"
+import { updateStock, addInventoryItem, deleteInventoryItem, updateInventoryItem } from "@/app/actions/inventory"
 
 type InventoryItem = any // type this properly later
 
@@ -23,6 +23,7 @@ export function InventoryClient({
     const [isStockInModalOpen, setIsStockInModalOpen] = useState(false)
     const [isStockOutModalOpen, setIsStockOutModalOpen] = useState(false)
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false)
+    const [editItem, setEditItem] = useState<any>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     const handleStockInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -71,6 +72,22 @@ export function InventoryClient({
         } catch (error: any) {
             console.error(error)
             alert(error.message || "Gagal menambahkan barang")
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleEditItemSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (!editItem) return
+        setIsSubmitting(true)
+        try {
+            await updateInventoryItem(editItem.id, new FormData(e.currentTarget))
+            setEditItem(null)
+            alert("Barang berhasil diperbarui!")
+        } catch (error: any) {
+            console.error(error)
+            alert(error.message || "Gagal memperbarui barang")
         } finally {
             setIsSubmitting(false)
         }
@@ -242,9 +259,14 @@ export function InventoryClient({
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-center">
-                                                    <button onClick={() => handleDeleteItem(item.id, item.name)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 transition-all">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button onClick={() => setEditItem(item)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-amber-500/10 text-slate-400 hover:text-amber-500 transition-all">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                                                        </button>
+                                                        <button onClick={() => handleDeleteItem(item.id, item.name)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 transition-all">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )
@@ -391,6 +413,49 @@ export function InventoryClient({
                                 <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50">
                                     {isSubmitting ? 'Menyimpan...' : 'Simpan Item'}
                                 </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Item Modal */}
+            {editItem && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden flex flex-col">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-amber-500/5">
+                            <h3 className="text-xl font-bold text-amber-700 dark:text-amber-400">Edit Item</h3>
+                            <button onClick={() => setEditItem(null)} className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-800 text-slate-500 rounded-full hover:bg-slate-100 cursor-pointer shadow-sm">
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleEditItemSubmit} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Barang *</label>
+                                <input required name="name" defaultValue={editItem.name} type="text" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori *</label>
+                                <select required name="type" defaultValue={editItem.type} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm appearance-none cursor-pointer">
+                                    <option value="feed">Pakan</option>
+                                    <option value="medicine">Obat / Vitamin</option>
+                                    <option value="vaccine">Vaksin</option>
+                                    <option value="equipment">Peralatan</option>
+                                </select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Satuan *</label>
+                                    <input required name="unit" defaultValue={editItem.unit} type="text" placeholder="Kg, Botol, Pcs" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Batas Minimum *</label>
+                                    <input required name="min_stock_alert" defaultValue={editItem.min_stock_alert} type="number" step="0.1" min="0" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm" />
+                                </div>
+                            </div>
+                            <div className="pt-4 flex gap-3">
+                                <button type="button" onClick={() => setEditItem(null)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors cursor-pointer">Batal</button>
+                                <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 transition-all disabled:opacity-50 cursor-pointer">{isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
                             </div>
                         </form>
                     </div>

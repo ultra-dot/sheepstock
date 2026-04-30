@@ -82,3 +82,30 @@ export async function deleteInventoryItem(itemId: string) {
 
     revalidatePath("/inventory")
 }
+
+export async function updateInventoryItem(itemId: string, formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    const name = formData.get("name") as string
+    const type = formData.get("type") as string
+    const unit = formData.get("unit") as string
+    const min_stock_alert = parseFloat(formData.get("min_stock_alert") as string)
+
+    if (!name || !type || !unit) throw new Error("Semua field wajib diisi")
+    if (isNaN(min_stock_alert) || min_stock_alert < 0) throw new Error("Batas minimum harus angka positif")
+
+    const { error } = await supabase.from("inventory_items").update({
+        name,
+        type,
+        unit,
+        min_stock_alert,
+    }).eq("id", itemId).eq("user_id", user.id)
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    revalidatePath("/inventory")
+}
