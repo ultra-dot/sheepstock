@@ -179,90 +179,6 @@ export default async function LandingPage() {
                 </div>
             </section>
 
-            {/* CONTACT */}
-            <section id="kontak" className="py-20 bg-slate-50">
-                <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Hubungi Kami</h2>
-                        <p className="text-sm text-slate-500 max-w-lg mx-auto">Punya pertanyaan atau ingin konsultasi? Isi formulir di bawah dan tim kami akan menghubungi Anda dalam 24 jam.</p>
-                    </div>
-
-                    <div className="grid lg:grid-cols-5 gap-6">
-                        {/* LEFT: Info + Map */}
-                        <div className="lg:col-span-2 flex flex-col gap-4">
-                            {/* Info Cards */}
-                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5">
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><Mail className="w-4 h-4" /></div>
-                                    <div>
-                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Email</p>
-                                        <p className="text-sm text-slate-500">sheepstock@gmail.com</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><Phone className="w-4 h-4" /></div>
-                                    <div>
-                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Telepon</p>
-                                        <p className="text-sm text-slate-500">+62 21 1234 5678</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><MapPin className="w-4 h-4" /></div>
-                                    <div>
-                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Kantor Pusat</p>
-                                        <p className="text-sm text-slate-500">Dramaga, Kabupaten Bogor, Jawa Barat</p>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Map */}
-                            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex-1 min-h-[200px]">
-                                <iframe
-                                    src="https://www.openstreetmap.org/export/embed.html?bbox=106.6900%2C-6.5700%2C106.7200%2C-6.5400&layer=mapnik&marker=-6.5550%2C106.7050"
-                                    className="w-full h-full min-h-[200px] border-0"
-                                    loading="lazy"
-                                    title="Lokasi SheepStock"
-                                ></iframe>
-                            </div>
-                        </div>
-
-                        {/* RIGHT: Form */}
-                        <div className="lg:col-span-3 bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
-                            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>Kirim Pesan</h3>
-                            <p className="text-sm text-slate-400 mb-6">Kami siap membantu kebutuhan peternakan Anda.</p>
-                            <form className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Awal</label>
-                                        <input type="text" placeholder="Naufal" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Akhir</label>
-                                        <input type="text" placeholder="Riyadi" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Alamat Email</label>
-                                    <input type="email" placeholder="naufal@gmail.com" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Jumlah Ternak</label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition appearance-none">
-                                        <option>Kurang dari 100</option>
-                                        <option>100 - 500</option>
-                                        <option>500+</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Pesan</label>
-                                    <textarea rows={3} placeholder="Ceritakan tentang operasional Anda..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition resize-none"></textarea>
-                                </div>
-                                <button type="button" className="w-full py-3 bg-[#054431] text-white rounded-xl font-bold text-sm hover:bg-[#065a40] transition shadow-lg">Kirim Pesan</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             {/* TESTIMONIAL */}
             <section id="tentang" className="py-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-[1000px] mx-auto">
@@ -312,6 +228,90 @@ export default async function LandingPage() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* CONTACT */}
+            <section id="kontak" className="py-20 bg-[#ffffff]">
+                <div className="max-w-[1000px] mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Hubungi Kami</h2>
+                        <p className="text-sm text-slate-500 max-w-lg mx-auto">Punya pertanyaan atau ingin konsultasi? Isi formulir di bawah dan tim kami akan menghubungi Anda dalam 24 jam.</p>
+                    </div>
+
+                    <div className="grid lg:grid-cols-5 gap-6">
+                        {/* LEFT: Info + Map */}
+                        <div className="lg:col-span-2 flex flex-col gap-4">
+                            {/* Info Cards */}
+                            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-5">
+                                <div className="flex items-start gap-3">
+                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><Mail className="w-4 h-4" /></div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Email</p>
+                                        <p className="text-sm text-slate-500">info@sheepstock.cloud</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><Phone className="w-4 h-4" /></div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Telepon</p>
+                                        <p className="text-sm text-slate-500">+62 21 1234 5678</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0 mt-0.5"><MapPin className="w-4 h-4" /></div>
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-900 mb-0.5">Kantor Pusat</p>
+                                        <p className="text-sm text-slate-500">Dramaga, Kabupaten Bogor, Jawa Barat</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Map */}
+                            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex-1 min-h-[200px]">
+                                <iframe
+                                    src="https://www.openstreetmap.org/export/embed.html?bbox=106.7150%2C-6.5750%2C106.7450%2C-6.5450&layer=mapnik&marker=-6.5604%2C106.7277"
+                                    className="w-full h-full min-h-[200px] border-0"
+                                    loading="lazy"
+                                    title="Lokasi SheepStock"
+                                ></iframe>
+                            </div>
+                        </div>
+
+                        {/* RIGHT: Form */}
+                        <div className="lg:col-span-3 bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
+                            <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>Kirim Pesan</h3>
+                            <p className="text-sm text-slate-400 mb-6">Kami siap membantu kebutuhan peternakan Anda.</p>
+                            <form className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Awal</label>
+                                        <input type="text" placeholder="Naufal" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Akhir</label>
+                                        <input type="text" placeholder="Riyadi" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Alamat Email</label>
+                                    <input type="email" placeholder="naufal@gmail.com" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Jumlah Ternak</label>
+                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition appearance-none">
+                                        <option>Kurang dari 100</option>
+                                        <option>100 - 500</option>
+                                        <option>500+</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Pesan</label>
+                                    <textarea rows={3} placeholder="Ceritakan tentang operasional Anda..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition resize-none"></textarea>
+                                </div>
+                                <button type="button" className="w-full py-3 bg-[#054431] text-white rounded-xl font-bold text-sm hover:bg-[#065a40] transition shadow-lg">Kirim Pesan</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -406,7 +406,7 @@ export default async function LandingPage() {
                                     </div>
                                     <div>
                                         <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Email</p>
-                                        <p className="text-sm text-white/70">sheepstock@gmail.com</p>
+                                        <p className="text-sm text-white/70">info@sheepstock.cloud</p>
                                     </div>
                                 </li>
                                 <li className="flex items-start gap-3">
