@@ -154,6 +154,11 @@ export function LoginForm({
                 </button>
               </div>
             </div>
+            <div className="flex justify-end mt-1">
+              <Link href="/forgot-password" className="text-[10px] font-bold text-[#4E6B03] hover:underline font-sans cursor-pointer">
+                Lupa Password?
+              </Link>
+            </div>
 
             <div className="flex justify-center mt-2">
               <Button 

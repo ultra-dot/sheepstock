@@ -83,3 +83,46 @@ export async function resendVerification(email: string) {
 
     return { success: true }
 }
+
+export async function forgotPassword(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+
+    const email = formData.get('email') as string
+
+    if (!email) {
+        return { error: 'Email wajib diisi.' }
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+    })
+
+    if (error) {
+        return { error: error.message || 'Gagal mengirim email reset password.' }
+    }
+
+    return { success: true, email }
+}
+
+export async function resetPassword(prevState: any, formData: FormData) {
+    const supabase = await createClient()
+
+    const password = formData.get('password') as string
+    const passwordConfirm = formData.get('passwordConfirm') as string
+
+    if (password !== passwordConfirm) {
+        return { error: 'Konfirmasi kata sandi tidak cocok.' }
+    }
+
+    if (password.length < 6) {
+        return { error: 'Kata sandi minimal 6 karakter.' }
+    }
+
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+        return { error: error.message || 'Gagal mengubah kata sandi.' }
+    }
+
+    return { success: true }
+}
