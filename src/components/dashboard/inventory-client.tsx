@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Box, ArrowUpRight, ArrowDownRight, Search, Filter, MoreVertical, BoxSelect, Syringe, Bug, Pill, X, PlusCircle, Users, Trash2 } from "lucide-react"
+import { Box, ArrowUpRight, ArrowDownRight, Search, Filter, MoreVertical, Wheat, Syringe, Wrench, Pill, X, PlusCircle, Users, Trash2 } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { updateStock, addInventoryItem, deleteInventoryItem } from "@/app/actions/inventory"
 
@@ -185,20 +185,20 @@ export function InventoryClient({
                                         const isOut = item.current_stock === 0;
 
                                         // Icon per type mapping
-                                        let TypeIcon = BoxSelect;
+                                        let TypeIcon = Box;
                                         let iconColorClass = "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400";
 
-                                        if (item.type?.toLowerCase() === 'feed') {
-                                            TypeIcon = BoxSelect;
+                                        if (['feed', 'pakan'].includes(item.type?.toLowerCase())) {
+                                            TypeIcon = Wheat;
                                             iconColorClass = "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400";
-                                        } else if (item.type?.toLowerCase() === 'medicine') {
+                                        } else if (['medicine', 'obat'].includes(item.type?.toLowerCase())) {
                                             TypeIcon = Pill;
                                             iconColorClass = "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400";
-                                        } else if (item.type?.toLowerCase() === 'vaccine') {
+                                        } else if (['vaccine', 'vaksin'].includes(item.type?.toLowerCase())) {
                                             TypeIcon = Syringe;
                                             iconColorClass = "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400";
-                                        } else if (item.type?.toLowerCase() === 'equipment') {
-                                            TypeIcon = Bug;
+                                        } else if (['equipment', 'peralatan'].includes(item.type?.toLowerCase())) {
+                                            TypeIcon = Wrench;
                                             iconColorClass = "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400";
                                         }
 
@@ -356,10 +356,10 @@ export function InventoryClient({
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori *</label>
                                     <select required name="type" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
-                                        <option value="feed">Pakan</option>
-                                        <option value="medicine">Obat</option>
-                                        <option value="vaccine">Vaksin</option>
-                                        <option value="equipment">Peralatan</option>
+                                        <option value="pakan">Pakan</option>
+                                        <option value="obat">Obat</option>
+                                        <option value="vaksin">Vaksin</option>
+                                        <option value="peralatan">Peralatan</option>
                                     </select>
                                 </div>
                                 <div>
