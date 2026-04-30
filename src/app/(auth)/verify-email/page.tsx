@@ -145,8 +145,14 @@ function VerifyEmailContent() {
 
             {/* Right Side: Content */}
             <div className="flex items-center justify-center p-6 bg-white overflow-y-auto relative z-10">
+                {/* Mobile back button */}
+                <Link href="/login" className="absolute top-4 left-4 lg:hidden w-9 h-9 rounded-full bg-[#EBEFEF] flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </Link>
                 <div className="w-full max-w-[360px] mx-auto">
-                    {/* Welcome Text */}
                     <div className="mb-8 text-center">
                         <div className="flex justify-center mb-6">
                             <div className="w-20 h-20 rounded-2xl bg-[#EBEFEF] flex items-center justify-center relative">

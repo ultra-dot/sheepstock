@@ -367,6 +367,8 @@ export default async function LandingPage() {
                             </div>
                         </div>
 
+                        {/* Navigasi + Produk — 2 columns on mobile */}
+                        <div className="grid grid-cols-2 sm:contents gap-8">
                         {/* Quick Links */}
                         <div>
                             <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Navigasi</h4>
@@ -401,6 +403,7 @@ export default async function LandingPage() {
                                     </li>
                                 ))}
                             </ul>
+                        </div>
                         </div>
 
                         {/* Contact */}

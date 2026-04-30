@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { login } from "@/app/actions/auth"
-import { useActionState, useState } from "react"
+import { useActionState, useState, useEffect } from "react"
 import { AlertCircle } from "lucide-react"
 import Link from "next/link"
 
@@ -16,8 +16,23 @@ export function LoginForm({
   const [state, formAction, isPending] = useActionState(login, null)
   const [showPassword, setShowPassword] = useState(false)
 
-  // Show loading overlay when form is submitting (server action handles redirect)
-  if (isPending) {
+  // Show loading overlay only when submitting and no prior error
+  // On success: isPending stays true (redirect happens server-side) → loading shows
+  // On failure: isPending flips false quickly + state.error is set → loading never shows
+  const [showLoading, setShowLoading] = useState(false)
+
+  // Start loading when form submits
+  // Stop loading immediately when an error comes back
+  useEffect(() => {
+    if (isPending) {
+      setShowLoading(true)
+    }
+    if (state?.error) {
+      setShowLoading(false)
+    }
+  }, [isPending, state])
+
+  if (showLoading && isPending) {
     return (
       <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center gap-5">
         <div className="flex items-center gap-3 mb-2">
@@ -88,7 +103,14 @@ export function LoginForm({
       </div>
 
       {/* Right Side: Login Form */}
-      <div className="flex items-center justify-center p-6 bg-white overflow-y-auto">
+      <div className="flex items-center justify-center p-6 bg-white overflow-y-auto relative">
+        {/* Mobile back button */}
+        <Link href="/" className="absolute top-4 left-4 lg:hidden w-9 h-9 rounded-full bg-[#EBEFEF] flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-200 transition-colors z-20">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </Link>
         <div className="w-full max-w-[360px] mx-auto">
           {/* Welcome Text */}
           <div className="mb-6 text-center">
