@@ -61,8 +61,8 @@ export default async function Dashboard() {
   return (
     <>
       {/* Header */}
-      <header className="h-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 z-10 shrink-0">
-        <div className="flex items-center gap-4 flex-1 max-w-xl">
+      <header className="h-20 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 z-10 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4 flex-1 max-w-xl min-w-0">
           <SidebarTrigger />
           <div className="relative group w-full hidden sm:block">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors w-5 h-5" />
@@ -73,7 +73,7 @@ export default async function Dashboard() {
             />
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <button className="relative w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
             <Bell className="w-5 h-5" />
           </button>

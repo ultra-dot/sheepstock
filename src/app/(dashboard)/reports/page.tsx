@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Printer, Settings2, FileText, Calendar, Layout } from 'lucide-react';
 import { ReportTemplate } from '@/components/reports/report-template';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 export default function ReportsPage() {
     const [reportType, setReportType] = useState('populasi');
@@ -27,18 +28,19 @@ export default function ReportsPage() {
     return (
         <div className="flex-1 flex flex-col h-full bg-slate-50/50 print:bg-white print:h-auto print:block">
             {/* Header - Hidden on print */}
-            <header className="h-16 flex items-center justify-between px-6 border-b border-emerald-500/10 bg-white/50 print:hidden">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+            <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-emerald-500/10 bg-white/50 backdrop-blur-md print:hidden shrink-0">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <SidebarTrigger />
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
                         <FileText className="w-4 h-4" />
                     </div>
-                    <h1 className="font-bold text-slate-900">Laporan</h1>
+                    <h1 className="font-bold text-slate-900 truncate">Laporan</h1>
                 </div>
             </header>
 
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row print:overflow-visible print:block">
                 {/* Configuration Sidebar - Hidden on print */}
-                <div className="w-full lg:w-80 border-r border-emerald-500/10 bg-white p-6 overflow-y-auto print:hidden">
+                <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-emerald-500/10 bg-white p-4 sm:p-6 overflow-y-auto print:hidden shrink-0">
                     <div className="flex items-center gap-2 mb-6">
                         <Settings2 className="w-4 h-4 text-slate-400" />
                         <h2 className="font-semibold text-slate-700">Konfigurasi Laporan</h2>
@@ -118,16 +120,37 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Preview Area - This is the only thing visible on print */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-200/50 print:p-0 print:bg-white print:overflow-visible print:block">
-                    {/* The Template */}
-                    <div className="print:w-full print:max-w-none">
-                        <ReportTemplate 
-                            reportType={reportType}
-                            dateRange={dateRange}
-                            paperSize={paperSize}
-                            data={mockData}
-                        />
+                <div className="flex-1 overflow-auto p-3 sm:p-4 md:p-8 bg-slate-200/50 print:p-0 print:bg-white print:overflow-visible print:block">
+                    {/* Mobile-friendly scaling wrapper */}
+                    <div className="flex justify-center print:block">
+                        <div className="origin-top print:transform-none print:w-full print:max-w-none" style={{ transform: 'scale(var(--preview-scale, 1))' }}>
+                            <style>{`
+                                @media (max-width: 640px) {
+                                    :root { --preview-scale: 0.55; }
+                                }
+                                @media (min-width: 641px) and (max-width: 1023px) {
+                                    :root { --preview-scale: 0.75; }
+                                }
+                                @media (min-width: 1024px) {
+                                    :root { --preview-scale: 1; }
+                                }
+                                @media print {
+                                    :root { --preview-scale: 1 !important; }
+                                }
+                            `}</style>
+                            <ReportTemplate 
+                                reportType={reportType}
+                                dateRange={dateRange}
+                                paperSize={paperSize}
+                                data={mockData}
+                            />
+                        </div>
                     </div>
+
+                    {/* Mobile hint */}
+                    <p className="text-center text-[10px] text-slate-400 mt-4 lg:hidden print:hidden font-medium">
+                        📄 Preview diperkecil agar muat di layar. Hasil cetak akan berukuran penuh.
+                    </p>
                 </div>
             </div>
 

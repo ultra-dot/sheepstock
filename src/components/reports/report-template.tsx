@@ -32,11 +32,10 @@ export const ReportTemplate = forwardRef<HTMLDivElement, ReportTemplateProps>(
         return (
             <div 
                 ref={ref} 
-                className="bg-white text-black p-8 md:p-12 mx-auto shadow-sm print:shadow-none print:p-0"
+                className="bg-white text-black p-8 md:p-12 mx-auto shadow-lg print:shadow-none print:p-0 print:w-full print:max-w-none print:min-h-0 border border-slate-200 print:border-none"
                 style={{
-                    // Approximate dimensions for screen preview (print relies on @page size)
-                    width: '100%',
-                    maxWidth: paperSize === 'a4' ? '210mm' : paperSize === 'f4' ? '215.9mm' : '215.9mm',
+                    // Fixed dimensions for accurate screen preview (print relies on @page size)
+                    width: paperSize === 'a4' ? '210mm' : paperSize === 'f4' ? '215.9mm' : '215.9mm',
                     minHeight: paperSize === 'a4' ? '297mm' : paperSize === 'f4' ? '330.2mm' : '279.4mm',
                 }}
             >

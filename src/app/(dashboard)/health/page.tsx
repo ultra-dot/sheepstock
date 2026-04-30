@@ -31,17 +31,17 @@ export default async function HealthPage() {
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
             {/* Header */}
-            <header className="h-20 sticky top-0 z-30 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-8 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-4">
+            <header className="h-20 sticky top-0 z-30 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-4 md:px-8 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <SidebarTrigger />
-                    <div className="flex items-center gap-3 ml-2">
-                        <Activity className="text-emerald-500 w-6 h-6" />
-                        <h2 className="text-xl font-bold tracking-tight">Kesehatan Ternak</h2>
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
+                        <Activity className="text-emerald-500 w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Kesehatan Ternak</h2>
                     </div>
                 </div>
-                <div className="flex gap-4 items-center">
-                    <button className="flex items-center gap-2 px-6 py-2.5 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-all font-bold text-sm shadow-lg shadow-emerald-500/20">
-                        <Plus className="w-5 h-5" />
+                <div className="flex gap-2 sm:gap-4 items-center shrink-0">
+                    <button className="flex items-center gap-2 px-3 sm:px-6 py-2.5 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 transition-all font-bold text-sm shadow-lg shadow-emerald-500/20">
+                        <Plus className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Catat Pengobatan</span>
                     </button>
                     {avatarUrl ? (
@@ -81,8 +81,8 @@ export default async function HealthPage() {
                 </div>
 
                 {/* Search & Filters (Matching Emerald Theme) */}
-                <div className="flex flex-wrap items-center gap-4 bg-emerald-500/5 p-4 rounded-2xl border border-emerald-500/10">
-                    <div className="relative flex-1 min-w-[300px] group">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 bg-emerald-500/5 p-3 sm:p-4 rounded-2xl border border-emerald-500/10">
+                    <div className="relative flex-1 min-w-[180px] sm:min-w-[300px] group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
                         <input className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-emerald-500/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none text-sm font-medium shadow-sm" placeholder="Cari ID Ternak, Diagnosa atau Obat..." type="text" />
                     </div>

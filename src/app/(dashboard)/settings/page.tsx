@@ -134,12 +134,12 @@ export default function SettingsPage() {
     return (
         <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
             {/* Header */}
-            <header className="h-20 sticky top-0 z-30 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-8 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-4">
+            <header className="h-20 sticky top-0 z-30 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-4 md:px-8 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <SidebarTrigger />
-                    <div className="flex items-center gap-3 ml-2">
-                        <Settings className="text-emerald-500 w-6 h-6" />
-                        <h2 className="text-xl font-bold tracking-tight">Pengaturan</h2>
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
+                        <Settings className="text-emerald-500 w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Pengaturan</h2>
                     </div>
                 </div>
             </header>
@@ -157,7 +157,7 @@ export default function SettingsPage() {
 
                         {/* Profile Section */}
                         <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-emerald-500/10 rounded-3xl shadow-lg overflow-hidden glass-card">
-                            <div className="p-6 border-b border-emerald-500/10 flex justify-between items-center">
+                            <div className="p-4 sm:p-6 border-b border-emerald-500/10 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                                 <div className="flex items-center gap-3">
                                     <User className="text-emerald-500 w-5 h-5" />
                                     <div>
@@ -195,8 +195,8 @@ export default function SettingsPage() {
                                 )}
                             </div>
 
-                            <div className="p-6 space-y-6">
-                                <div className="flex items-center gap-6">
+                            <div className="p-4 sm:p-6 space-y-6">
+                                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                                     <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 overflow-hidden">
                                         {avatarUrl ? (
                                             <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Standard Logout */}
-                        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl p-6 glass-card flex items-center justify-between">
+                        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
                                 <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Sesi Akun</h3>
                                 <p className="text-sm text-slate-500">Keluar dari aplikasi web SheepStock.</p>
