@@ -92,9 +92,10 @@ export function QrScannerModal({
 
                     <Scanner
                         onScan={handleScan}
-                        onError={(err) => {
+                        onError={(error) => {
                             // Don't show annoying console errors for standard scanning failures,
                             // only catch real permission/hardware errors.
+                            const err = error as unknown as Error;
                             if (err?.name === 'NotAllowedError') {
                                 setErrorMsg("Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser Anda.");
                             } else if (err?.name === 'NotFoundError') {
@@ -103,10 +104,6 @@ export function QrScannerModal({
                         }}
                         constraints={{
                             facingMode: facingMode
-                        }}
-                        components={{
-                            tracker: true,
-                            audio: true, // Beep on success
                         }}
                         styles={{
                             container: { width: '100%', height: '100%' }
