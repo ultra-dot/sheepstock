@@ -13,8 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SheepStock - MitraTani Farm",
+  title: "SheepStock",
   description: "Livestock Management System for MitraTani Farm",
+  icons: {
+    icon: '/logo.png',
+  }
 };
 
 export default function RootLayout({
