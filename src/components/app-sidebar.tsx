@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar"
 import { logout } from "@/app/actions/auth"
 import { useState, useEffect } from "react"
+import { useFormStatus } from "react-dom"
 import { createClient } from "@/lib/supabase/client"
 
 // Menu items
@@ -145,15 +146,42 @@ export function AppSidebar() {
 
                 {/* Logout Button */}
                 <form action={logout} className="w-full">
-                    <button
-                        type="submit"
-                        className="flex items-center justify-center gap-2 text-sm text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-50 dark:hover:bg-rose-950/50 w-full p-2.5 rounded-xl transition-colors border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        <span>Keluar</span>
-                    </button>
+                    <LogoutButton />
                 </form>
             </SidebarFooter>
         </Sidebar>
+    )
+}
+
+function LogoutButton() {
+    const { pending } = useFormStatus()
+
+    return (
+        <>
+            {pending && (
+                <div className="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center gap-5">
+                    <div className="flex items-center gap-3 mb-2">
+                        <img src="/assets/image/logo-sheepstock-green.png" alt="Logo" className="w-11 h-11 object-contain" />
+                        <span className="text-2xl font-extrabold text-[#054431] tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>SheepStock</span>
+                    </div>
+                    <div className="relative w-10 h-10">
+                        <div className="absolute inset-0 rounded-full border-[3px] border-emerald-100" />
+                        <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-emerald-500 animate-spin" />
+                    </div>
+                    <div className="text-center">
+                        <p className="text-sm font-semibold text-slate-700">Keluar dari akun...</p>
+                        <p className="text-xs text-slate-400 mt-1">Mengarahkan ke beranda</p>
+                    </div>
+                </div>
+            )}
+            <button
+                type="submit"
+                disabled={pending}
+                className="flex items-center justify-center gap-2 text-sm text-rose-600 dark:text-rose-400 font-semibold hover:bg-rose-50 dark:hover:bg-rose-950/50 w-full p-2.5 rounded-xl transition-colors border border-transparent hover:border-rose-100 dark:hover:border-rose-900/50 cursor-pointer"
+            >
+                <LogOut className="w-4 h-4" />
+                <span>{pending ? "Keluar..." : "Keluar"}</span>
+            </button>
+        </>
     )
 }

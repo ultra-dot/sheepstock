@@ -20,13 +20,13 @@ export async function login(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/')
+    redirect('/dashboard')
 }
 
 export async function logout() {
     const supabase = await createClient()
     await supabase.auth.signOut()
-    redirect('/login')
+    redirect('/')
 }
 
 export async function register(prevState: any, formData: FormData) {
@@ -55,10 +55,31 @@ export async function register(prevState: any, formData: FormData) {
         return { error: error.message || 'Terjadi kesalahan saat pendaftaran.' }
     }
 
+    // Supabase returns a user but with empty identities if the email already exists 
+    // to prevent email enumeration, but we want to show a helpful error
+    if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        return { error: 'Email sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.' }
+    }
+
     if (data?.user) {
         // Force update profile to ensure it matches the registered name instead of DB defaults
         await supabase.from('profiles').update({ name: name }).eq('id', data.user.id);
     }
 
-    redirect('/login')
+    return { success: true, email }
+}
+
+export async function resendVerification(email: string) {
+    const supabase = await createClient()
+
+    const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+    })
+
+    if (error) {
+        return { error: error.message || 'Gagal mengirim ulang email verifikasi.' }
+    }
+
+    return { success: true }
 }

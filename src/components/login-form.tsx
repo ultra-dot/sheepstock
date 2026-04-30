@@ -16,6 +16,26 @@ export function LoginForm({
   const [state, formAction, isPending] = useActionState(login, null)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Show loading overlay when form is submitting (server action handles redirect)
+  if (isPending) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center gap-5">
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/assets/image/logo-sheepstock-green.png" alt="Logo" className="w-11 h-11 object-contain" />
+          <span className="text-2xl font-extrabold text-[#054431] tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>SheepStock</span>
+        </div>
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-[3px] border-emerald-100" />
+          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-emerald-500 animate-spin" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-slate-700">Mempersiapkan dashboard...</p>
+          <p className="text-xs text-slate-400 mt-1">Harap tunggu sebentar</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={cn("grid h-screen w-full lg:grid-cols-2 overflow-hidden", className)} {...props}>
       {/* Left Side: Editorial Content Shell */}

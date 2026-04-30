@@ -4,9 +4,10 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { register } from "@/app/actions/auth"
-import { useActionState, useState } from "react"
+import { useActionState, useState, useEffect } from "react"
 import { AlertCircle } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function RegisterForm({
   className,
@@ -16,6 +17,41 @@ export function RegisterForm({
   const [state, formAction, isPending] = useActionState(register, null)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
+  const router = useRouter()
+
+  // When registration succeeds, show loading then redirect to verify-email
+  useEffect(() => {
+    if (state?.success && state?.email) {
+      setShowLoading(true)
+      const timer = setTimeout(() => {
+        router.push(`/verify-email?email=${encodeURIComponent(state.email)}`)
+      }, 1800)
+      return () => clearTimeout(timer)
+    }
+  }, [state, router])
+
+  // Loading overlay
+  if (showLoading) {
+    return (
+      <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center gap-5">
+        {/* Logo */}
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/assets/image/logo-sheepstock-green.png" alt="Logo" className="w-11 h-11 object-contain" />
+          <span className="text-2xl font-extrabold text-[#054431] tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>SheepStock</span>
+        </div>
+        {/* Spinner */}
+        <div className="relative w-10 h-10">
+          <div className="absolute inset-0 rounded-full border-[3px] border-emerald-100" />
+          <div className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-emerald-500 animate-spin" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-semibold text-slate-700">Membuat akun Anda...</p>
+          <p className="text-xs text-slate-400 mt-1">Harap tunggu sebentar</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={cn("grid h-screen w-full lg:grid-cols-2 overflow-hidden bg-white", className)} {...props}>

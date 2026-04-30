@@ -317,22 +317,129 @@ export default async function LandingPage() {
             </section>
 
             {/* FOOTER */}
-            <footer className="bg-gradient-to-r from-[#193d2f] via-[#2e7056] to-[#2b5444] py-10 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-5xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 pb-6 border-b border-emerald-800/40">
-                        <div className="flex items-center gap-2">
-                            <img src="/assets/image/logo-sheepstock-green.png" alt="Logo" className="w-8 h-8 object-contain brightness-0 invert" />
-                            <span className="text-lg font-extrabold text-white" style={{ fontFamily: "'Poppins', sans-serif" }}>SheepStock</span>
+            <footer className="relative bg-[#0B1F17] overflow-hidden">
+                {/* Subtle gradient glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
+
+                {/* Newsletter / CTA Strip */}
+                <div className="relative z-10 border-b border-white/5">
+                    <div className="max-w-[1100px] mx-auto px-6 md:px-12 lg:px-16 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="text-center md:text-left">
+                            <h3 className="text-lg font-bold text-white mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>Siap Memulai Digitalisasi?</h3>
+                            <p className="text-sm text-white/40">Bergabung dengan ribuan peternak modern di seluruh Indonesia.</p>
                         </div>
-                        <div className="flex flex-wrap items-center gap-5 text-sm text-white/40">
-                            <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5 text-emerald-400" /> info@sheepstock.id</span>
-                            <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 text-emerald-400" /> +62 21 1234 5678</span>
-                            <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-emerald-400" /> Bogor, West Java</span>
+                        <Link href="/register" className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-[#0B1F17] rounded-full font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-400/30 shrink-0">
+                            Daftar Gratis →
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Main Footer Content */}
+                <div className="relative z-10 max-w-[1100px] mx-auto px-6 md:px-12 lg:px-16 py-12">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+                        {/* Brand Column */}
+                        <div className="sm:col-span-2 lg:col-span-1">
+                            <div className="flex items-center gap-2.5 mb-4">
+                                <img src="/assets/image/logo-sheepstock-green.png" alt="Logo" className="w-9 h-9 object-contain brightness-0 invert" />
+                                <span className="text-xl font-extrabold text-white tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>SheepStock</span>
+                            </div>
+                            <p className="text-sm text-white/40 leading-relaxed mb-6 max-w-[260px]">
+                                Platform manajemen peternakan digital terdepan untuk operasional yang lebih efisien dan transparan.
+                            </p>
+                            {/* Social Icons */}
+                            <div className="flex items-center gap-3">
+                                {[
+                                    { label: "Instagram", path: "M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z" },
+                                    { label: "YouTube", path: "M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" },
+                                    { label: "WhatsApp", path: "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" },
+                                ].map((social) => (
+                                    <a key={social.label} href="#" aria-label={social.label} className="w-9 h-9 rounded-lg bg-white/5 hover:bg-emerald-500/20 border border-white/5 hover:border-emerald-500/30 flex items-center justify-center text-white/40 hover:text-emerald-400 transition-all duration-300">
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d={social.path} /></svg>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Quick Links */}
+                        <div>
+                            <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Navigasi</h4>
+                            <ul className="space-y-3">
+                                {[
+                                    { label: "Beranda", href: "#" },
+                                    { label: "Fitur", href: "#fitur" },
+                                    { label: "Harga", href: "#harga" },
+                                    { label: "Tentang Kami", href: "#tentang" },
+                                    { label: "Kontak", href: "#kontak" },
+                                ].map((link) => (
+                                    <li key={link.label}>
+                                        <a href={link.href} className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200">{link.label}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Product */}
+                        <div>
+                            <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Produk</h4>
+                            <ul className="space-y-3">
+                                {[
+                                    "Dashboard",
+                                    "Manajemen Ternak",
+                                    "Pelacakan QR Code",
+                                    "Analitik Kesehatan",
+                                    "Manajemen Pakan",
+                                ].map((item) => (
+                                    <li key={item}>
+                                        <span className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200 cursor-default">{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Contact */}
+                        <div>
+                            <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Kontak</h4>
+                            <ul className="space-y-4">
+                                <li className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <Mail className="w-3.5 h-3.5 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Email</p>
+                                        <p className="text-sm text-white/70">sheepstock@gmail.com</p>
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <Phone className="w-3.5 h-3.5 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Telepon</p>
+                                        <p className="text-sm text-white/70">+62 21 1234 5678</p>
+                                    </div>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-[11px] font-bold text-white/50 uppercase tracking-wider mb-0.5">Alamat</p>
+                                        <p className="text-sm text-white/70">Dramaga, Kab. Bogor,<br />Jawa Barat</p>
+                                    </div>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-2 text-white/30 text-sm">
-                        <p>&copy; 2026 SheepStock &middot; All rights reserved.</p>
-                        <p>Privacy Terms</p>
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="relative z-10 border-t border-white/5">
+                    <div className="max-w-[1100px] mx-auto px-6 md:px-12 lg:px-16 py-5 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <p className="text-xs text-white/25">&copy; 2026 SheepStock. All rights reserved.</p>
+                        <div className="flex items-center gap-6">
+                            <a href="#" className="text-xs text-white/25 hover:text-white/50 transition-colors">Privacy Policy</a>
+                            <a href="#" className="text-xs text-white/25 hover:text-white/50 transition-colors">Terms of Service</a>
+                        </div>
                     </div>
                 </div>
             </footer>
