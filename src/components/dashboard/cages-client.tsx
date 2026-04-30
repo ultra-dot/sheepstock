@@ -3,8 +3,14 @@
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat, Users } from "lucide-react"
 import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch, updateCageCleaningStatus } from "@/app/actions/cages"
-
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { QrCode } from "lucide-react"
+import dynamic from "next/dynamic"
+
+const QrScannerModal = dynamic(
+    () => import("@/components/qr/qr-scanner-modal").then(mod => mod.QrScannerModal),
+    { ssr: false }
+)
 
 export type CageWithStats = {
     id: string
@@ -56,6 +62,7 @@ export function CagesClient({
     const [moveTargetCageId, setMoveTargetCageId] = useState<string>("")
     const [selectedLivestockIds, setSelectedLivestockIds] = useState<Set<string>>(new Set())
     const [qrSearch, setQrSearch] = useState<string>("")
+    const [isScannerOpen, setIsScannerOpen] = useState<boolean>(false)
     const [moveStep, setMoveStep] = useState<1 | 2>(1)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const ITEMS_PER_PAGE = 5
@@ -177,24 +184,27 @@ export function CagesClient({
         return sourceOccupants.slice(start, end);
     }, [sourceOccupants, currentPage]);
 
+    const handleScanId = (code: string) => {
+        if (!code) return;
+
+        const animal = sourceOccupants.find(a => a.qr_code === code || a.qr_code?.toLowerCase() === code.toLowerCase());
+        if (animal) {
+            setSelectedLivestockIds(prev => {
+                const newSet = new Set(prev);
+                newSet.add(animal.id);
+                return newSet;
+            });
+            setQrSearch("");
+        } else {
+            alert(`QR Code / ID ${code} tidak ditemukan di kandang asal ini.`);
+            setQrSearch("");
+        }
+    };
+
     const handleQrScan = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault(); // Prevent form submission
-            const code = qrSearch.trim();
-            if (!code) return;
-
-            const animal = sourceOccupants.find(a => a.qr_code === code || a.qr_code?.toLowerCase() === code.toLowerCase());
-            if (animal) {
-                setSelectedLivestockIds(prev => {
-                    const newSet = new Set(prev);
-                    newSet.add(animal.id);
-                    return newSet;
-                });
-                setQrSearch("");
-            } else {
-                alert(`QR Code / ID ${code} tidak ditemukan di kandang asal ini.`);
-                setQrSearch("");
-            }
+            handleScanId(qrSearch.trim());
         }
     }
 
@@ -708,14 +718,28 @@ export function CagesClient({
                                             Scan QR / Cari ID Ternak
                                             <span className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[10px]">Enter</span>
                                         </label>
-                                        <input
-                                            type="text"
-                                            placeholder="Arahkan scanner atau ketik ID..."
-                                            value={qrSearch}
-                                            onChange={(e) => setQrSearch(e.target.value)}
-                                            onKeyDown={handleQrScan}
-                                            className="w-full px-4 py-3 bg-white dark:bg-slate-900 border-2 border-emerald-500/50 rounded-xl focus:ring-emerald-500 outline-none text-sm font-mono shadow-sm"
-                                        />
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Arahkan scanner atau ketik ID..."
+                                                value={qrSearch}
+                                                onChange={(e) => setQrSearch(e.target.value)}
+                                                onKeyDown={handleQrScan}
+                                                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border-2 border-emerald-500/50 rounded-xl focus:ring-emerald-500 outline-none text-sm font-mono shadow-sm"
+                                            />
+                                            <button 
+                                                type="button" 
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    setIsScannerOpen(true);
+                                                }}
+                                                className="px-4 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/40 dark:text-emerald-400 border border-emerald-500/20 rounded-xl flex items-center justify-center transition-colors shadow-sm cursor-pointer z-10 relative"
+                                                title="Buka Kamera Scanner"
+                                            >
+                                                <QrCode className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-2 bg-slate-50 dark:bg-slate-800/20">
@@ -833,6 +857,15 @@ export function CagesClient({
                     </div>
                 </div>
             )}
+            
+            {/* QR Scanner Modal for Move Flock */}
+            <QrScannerModal
+                isOpen={isScannerOpen}
+                onClose={() => setIsScannerOpen(false)}
+                onScanSuccess={(id) => {
+                    handleScanId(id);
+                }}
+            />
         </div>
     )
 }

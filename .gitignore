@@ -45,3 +45,9 @@ next-env.d.ts
 DOKUMENTASI_MODUL_DAN_COMMIT.md
 Design_Specification.md
 src/ui_wireframe_plan.md
+
+# AI Assistant artifacts
+implementation_*.md
+walkthrough_*.md
+task.md
+*.sql

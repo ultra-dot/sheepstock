@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle } from "lucide-react"
+import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle, FileText } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 
@@ -41,6 +41,11 @@ const items = [
         title: "Kesehatan",
         url: "/health",
         icon: Activity,
+    },
+    {
+        title: "Laporan",
+        url: "/reports",
+        icon: FileText,
     },
     {
         title: "Pengaturan",
@@ -89,7 +94,7 @@ export function AppSidebar() {
     }, []);
 
     return (
-        <Sidebar className="border-r border-emerald-500/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md">
+        <Sidebar className="border-r border-emerald-500/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md print:hidden">
 
             {/* Header */}
             <SidebarHeader className="p-6">

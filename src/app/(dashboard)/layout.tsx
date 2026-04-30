@@ -11,7 +11,7 @@ export default function DashboardLayout({
         <TooltipProvider>
             <SidebarProvider>
                 <AppSidebar />
-                <main className="w-full flex-1 h-screen overflow-hidden flex flex-col">
+                <main className="w-full flex-1 h-screen overflow-hidden flex flex-col print:h-auto print:overflow-visible print:block">
                     {children}
                 </main>
             </SidebarProvider>
