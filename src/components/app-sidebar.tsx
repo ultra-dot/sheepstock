@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle, FileText } from "lucide-react"
+import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle, FileText, Users, CreditCard, Repeat } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 
@@ -16,48 +16,26 @@ import { useFormStatus } from "react-dom"
 import { createClient } from "@/lib/supabase/client"
 
 // Menu items
-const items = [
-    {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: LayoutDashboard,
-    },
-    {
-        title: "Manajemen Kandang",
-        url: "/cages",
-        icon: Warehouse,
-    },
-    {
-        title: "Inventori Ternak",
-        url: "/livestock",
-        icon: PawPrint,
-    },
-    {
-        title: "Manajemen Pakan",
-        url: "/inventory",
-        icon: Box,
-    },
-    {
-        title: "Kesehatan",
-        url: "/health",
-        icon: Activity,
-    },
-    {
-        title: "Laporan",
-        url: "/reports",
-        icon: FileText,
-    },
-    {
-        title: "Pengaturan",
-        url: "/settings",
-        icon: Settings,
-    },
+const navItems = [
+    { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+    { title: "Manajemen Kandang", url: "/cages", icon: Warehouse },
+    { title: "Inventori Ternak", url: "/livestock", icon: PawPrint },
+    { title: "Manajemen Pakan", url: "/inventory", icon: Box },
+    { title: "Kesehatan", url: "/health", icon: Activity },
+    { title: "Laporan", url: "/reports", icon: FileText },
+]
+
+const adminItems = [
+    { title: "Manajemen Tim", url: "/settings/team", icon: Users },
+    { title: "Paket Langganan", url: "/settings/subscription", icon: CreditCard },
+    { title: "Pengaturan", url: "/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
     const pathname = usePathname();
     const [userName, setUserName] = useState("Admin Peternakan");
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [activeFarm, setActiveFarm] = useState("MitraTani Farm Utama");
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -96,39 +74,81 @@ export function AppSidebar() {
     return (
         <Sidebar className="border-r border-emerald-500/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-md print:hidden">
 
-            {/* Header */}
+            {/* Header with Farm Switcher */}
             <SidebarHeader className="p-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white shadow-sm border border-emerald-500/10 shrink-0">
                         <img src="/assets/image/logo-sheepstock-green.png" alt="SheepStock Logo" className="w-full h-full object-cover" />
                     </div>
                     <div>
                         <h1 className="font-bold text-lg leading-none">SheepStock</h1>
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">© MitraTani Farm</p>
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-black mt-1 uppercase tracking-widest">SaaS Provider</p>
                     </div>
                 </div>
+
+                {/* Farm Switcher UI */}
+                <Link 
+                    href="/select-farm"
+                    className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 border border-emerald-500/10 rounded-2xl shadow-sm hover:border-emerald-500/50 transition-all group"
+                >
+                    <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
+                            <Warehouse className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-left">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider leading-none mb-1">Peternakan Aktif</p>
+                            <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{activeFarm}</p>
+                        </div>
+                    </div>
+                    <Repeat className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors shrink-0" />
+                </Link>
             </SidebarHeader>
 
             {/* Content (Navigation) */}
             <SidebarContent className="px-4 mt-2">
-                <nav className="flex-1 space-y-2">
-                    {items.map((item) => {
-                        const isActive = pathname === item.url;
-                        return (
-                            <Link
-                                href={item.url}
-                                key={item.title}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
-                                    : "text-slate-600 dark:text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-600"
-                                    }`}
-                            >
-                                <item.icon className="w-5 h-5" />
-                                <span className="text-sm">{item.title}</span>
-                            </Link>
-                        )
-                    })}
-                </nav>
+                <div className="mb-6">
+                    <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Menu Utama</p>
+                    <nav className="space-y-1">
+                        {navItems.map((item) => {
+                            const isActive = pathname === item.url;
+                            return (
+                                <Link
+                                    href={item.url}
+                                    key={item.title}
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isActive
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-600"
+                                        }`}
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    <span className="text-sm">{item.title}</span>
+                                </Link>
+                            )
+                        })}
+                    </nav>
+                </div>
+
+                <div>
+                    <p className="px-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Administrasi</p>
+                    <nav className="space-y-1">
+                        {adminItems.map((item) => {
+                            const isActive = pathname === item.url;
+                            return (
+                                <Link
+                                    href={item.url}
+                                    key={item.title}
+                                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${isActive
+                                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold"
+                                        : "text-slate-600 dark:text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-600"
+                                        }`}
+                                >
+                                    <item.icon className="w-4 h-4" />
+                                    <span className="text-sm">{item.title}</span>
+                                </Link>
+                            )
+                        })}
+                    </nav>
+                </div>
             </SidebarContent>
 
             {/* Footer */}
