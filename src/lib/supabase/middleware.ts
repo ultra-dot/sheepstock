@@ -36,14 +36,14 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     // Protect all routes inside (dashboard)
-    // If no user and trying to access anything other than /login, /register, /auth, and the root /
+    // If no user and trying to access anything other than public auth pages and the root /
+    // NOTE: /reset-password is NOT whitelisted — user must be authenticated via email callback first
     if (
         !user &&
         !request.nextUrl.pathname.startsWith('/login') &&
         !request.nextUrl.pathname.startsWith('/register') &&
         !request.nextUrl.pathname.startsWith('/verify-email') &&
         !request.nextUrl.pathname.startsWith('/forgot-password') &&
-        !request.nextUrl.pathname.startsWith('/reset-password') &&
         !request.nextUrl.pathname.startsWith('/auth') &&
         request.nextUrl.pathname !== '/'
     ) {
@@ -54,12 +54,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     // If user is logged in and trying to access /login or /register, redirect to dashboard
-    // Exception: /reset-password must remain accessible for authenticated users coming from email callback
-    if (
-        user &&
-        (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') &&
-        !request.nextUrl.pathname.startsWith('/reset-password')
-    ) {
+    if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
