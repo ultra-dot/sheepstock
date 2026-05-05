@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 
 // Password reset callback → Reset Password Page
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
+    const { searchParams } = new URL(request.url)
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     const code = searchParams.get('code')
 
     if (code) {
@@ -12,10 +13,10 @@ export async function GET(request: Request) {
 
         if (!error) {
             // Session is now active, redirect to the reset password form
-            return NextResponse.redirect(`${origin}/reset-password`)
+            return NextResponse.redirect(`${baseUrl}/reset-password`)
         }
     }
 
     // If no code or exchange failed, redirect to forgot-password to try again
-    return NextResponse.redirect(`${origin}/forgot-password`)
+    return NextResponse.redirect(`${baseUrl}/forgot-password`)
 }
