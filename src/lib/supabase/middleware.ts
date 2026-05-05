@@ -54,7 +54,12 @@ export async function updateSession(request: NextRequest) {
     }
 
     // If user is logged in and trying to access /login or /register, redirect to dashboard
-    if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
+    // Exception: /reset-password must remain accessible for authenticated users coming from email callback
+    if (
+        user &&
+        (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register') &&
+        !request.nextUrl.pathname.startsWith('/reset-password')
+    ) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'
         return NextResponse.redirect(url)
