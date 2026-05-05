@@ -47,7 +47,8 @@ export async function register(prevState: any, formData: FormData) {
         options: {
             data: {
                 full_name: name,
-            }
+            },
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/dashboard`,
         }
     })
 
@@ -94,7 +95,7 @@ export async function forgotPassword(prevState: any, formData: FormData) {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/reset-password`,
     })
 
     if (error) {
