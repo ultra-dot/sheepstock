@@ -28,13 +28,12 @@ export default function ReportsPage() {
     return (
         <div className="flex-1 flex flex-col h-full bg-slate-50/50 print:bg-white print:h-auto print:block">
             {/* Header - Hidden on print */}
-            <header className="h-16 flex items-center justify-between px-4 md:px-6 border-b border-emerald-500/10 bg-white/50 backdrop-blur-md print:hidden shrink-0">
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <header className="h-20 sticky top-0 z-30 bg-white/30 dark:bg-slate-950/30 backdrop-blur-md border-b border-emerald-500/10 px-4 md:px-8 flex items-center justify-between shrink-0 print:hidden">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <SidebarTrigger />
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
-                        <FileText className="w-4 h-4" />
+                    <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
+                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Laporan</h2>
                     </div>
-                    <h1 className="font-bold text-slate-900 truncate">Laporan</h1>
                 </div>
             </header>
 
@@ -50,7 +49,7 @@ export default function ReportsPage() {
                         {/* Report Type */}
                         <div>
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jenis Laporan</label>
-                            <select 
+                            <select
                                 value={reportType}
                                 onChange={(e) => setReportType(e.target.value)}
                                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-emerald-500"
@@ -69,8 +68,8 @@ export default function ReportsPage() {
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <span className="text-[10px] text-slate-400 mb-1 block">Mulai</span>
-                                    <input 
-                                        type="date" 
+                                    <input
+                                        type="date"
                                         value={dateRange.start}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
                                         className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-emerald-500"
@@ -78,8 +77,8 @@ export default function ReportsPage() {
                                 </div>
                                 <div>
                                     <span className="text-[10px] text-slate-400 mb-1 block">Sampai</span>
-                                    <input 
-                                        type="date" 
+                                    <input
+                                        type="date"
                                         value={dateRange.end}
                                         onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
                                         className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-emerald-500"
@@ -93,9 +92,9 @@ export default function ReportsPage() {
                             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                                 <Layout className="w-3 h-3" /> Ukuran Kertas
                             </label>
-                            <select 
+                            <select
                                 value={paperSize}
-                                onChange={(e) => setPaperSize(e.target.value as 'a4'|'f4'|'letter')}
+                                onChange={(e) => setPaperSize(e.target.value as 'a4' | 'f4' | 'letter')}
                                 className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-emerald-500"
                             >
                                 <option value="a4">A4 (210 x 297 mm)</option>
@@ -109,7 +108,7 @@ export default function ReportsPage() {
 
                         {/* Print Button */}
                         <div className="pt-4 border-t border-slate-100">
-                            <button 
+                            <button
                                 onClick={handlePrint}
                                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2"
                             >
@@ -138,7 +137,7 @@ export default function ReportsPage() {
                                     :root { --preview-scale: 1 !important; }
                                 }
                             `}</style>
-                            <ReportTemplate 
+                            <ReportTemplate
                                 reportType={reportType}
                                 dateRange={dateRange}
                                 paperSize={paperSize}

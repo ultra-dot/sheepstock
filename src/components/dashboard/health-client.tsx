@@ -154,7 +154,6 @@ export function HealthClient({
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0">
                     <SidebarTrigger />
                     <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
-                        <Activity className="text-emerald-500 w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                         <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Kesehatan Ternak</h2>
                     </div>
                 </div>

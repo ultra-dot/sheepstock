@@ -198,23 +198,23 @@ export default async function LandingPage() {
                         {[
                             {
                                 quote: "SheepStock mengubah cara saya melihat ternak. Dulu hanya perasaan, sekarang semuanya berdasarkan data akurat.",
-                                name: "Bapak Slamet Rahardjo",
+                                name: "Alif Baha",
                                 role: "Peternak Mandiri, Bogor",
-                                img: "https://images.unsplash.com/photo-1595844730298-b960ff88fee6?w=200&q=60",
+                                img: "https://randomuser.me/api/portraits/men/32.jpg",
                                 stars: 5,
                             },
                             {
                                 quote: "Fitur pelacakan QR sangat membantu kami mengidentifikasi ternak secara cepat. Efisiensi operasional naik drastis.",
-                                name: "Ibu Ratna Dewi",
+                                name: "Aldenara",
                                 role: "Manajer Peternakan, Bandung",
-                                img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=60",
+                                img: "https://randomuser.me/api/portraits/men/45.jpg",
                                 stars: 5,
                             },
                             {
                                 quote: "Dashboard real-time membantu saya memantau kesehatan ternak dari mana saja. Sangat direkomendasikan!",
-                                name: "Bapak Hendra Wijaya",
+                                name: "Naufal Riyadi",
                                 role: "Owner CV Ternak Jaya, Surabaya",
-                                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=60",
+                                img: "https://randomuser.me/api/portraits/men/78.jpg",
                                 stars: 5,
                             },
                         ].map((t, i) => (
