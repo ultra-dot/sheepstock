@@ -72,7 +72,7 @@ export default async function CagesPage() {
     const { data: feedItems } = await supabase
         .from("inventory_items")
         .select("id, name, current_stock, unit")
-        .eq("type", "feed")
+        .in("type", ["feed", "pakan"])
         .gt("current_stock", 0)
         .order("name")
 

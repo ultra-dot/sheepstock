@@ -19,7 +19,7 @@ export default async function HealthPage() {
         .select(`
       *,
       livestocks ( qr_code, type, gender ),
-      inventory_items ( name )
+      inventory_items ( name, unit )
     `)
         .order('date', { ascending: false })
 

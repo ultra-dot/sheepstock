@@ -505,7 +505,7 @@ export function HealthClient({
                             <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Diagnosa & Tindakan</p><p className="text-sm text-slate-600 dark:text-slate-400 mt-1 bg-slate-50 dark:bg-slate-800 p-3 rounded-xl">{viewRecord.treatment}</p></div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Obat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-1">{viewRecord.inventory_items?.name || '-'}</p></div>
-                                <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jumlah Obat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-1">{viewRecord.medicine_qty || '-'}</p></div>
+                                <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jumlah Obat</p><p className="text-sm font-bold text-slate-700 dark:text-slate-300 mt-1">{viewRecord.medicine_qty || '-'} {viewRecord.medicine_qty && viewRecord.inventory_items?.unit && <span className="text-xs font-normal text-slate-500 ml-1">{viewRecord.inventory_items.unit}</span>}</p></div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</p><div className="mt-2">{statusBadge(viewRecord.status)}</div></div>

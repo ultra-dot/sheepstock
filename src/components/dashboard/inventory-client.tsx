@@ -170,6 +170,7 @@ export function InventoryClient({
                             <option>Pakan</option>
                             <option>Obat</option>
                             <option>Vaksin</option>
+                            <option>Peralatan</option>
                         </select>
                         <button className="px-4 rounded-xl border border-emerald-500/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-600 flex items-center justify-center shadow-sm transition-colors">
                             <Filter className="w-5 h-5" />
@@ -390,9 +391,6 @@ export function InventoryClient({
                                         <option value="kg">Kg</option>
                                         <option value="liter">Liter</option>
                                         <option value="pcs">Pcs</option>
-                                        <option value="botol">Botol</option>
-                                        <option value="sachet">Sachet</option>
-                                        <option value="karung">Karung</option>
                                     </select>
                                 </div>
                             </div>
@@ -437,16 +435,20 @@ export function InventoryClient({
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kategori *</label>
                                 <select required name="type" defaultValue={editItem.type} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm appearance-none cursor-pointer">
-                                    <option value="feed">Pakan</option>
-                                    <option value="medicine">Obat / Vitamin</option>
-                                    <option value="vaccine">Vaksin</option>
-                                    <option value="equipment">Peralatan</option>
+                                    <option value="pakan">Pakan</option>
+                                    <option value="obat">Obat</option>
+                                    <option value="vaksin">Vaksin</option>
+                                    <option value="peralatan">Peralatan</option>
                                 </select>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Satuan *</label>
-                                    <input required name="unit" defaultValue={editItem.unit} type="text" placeholder="Kg, Botol, Pcs" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm" />
+                                    <select required name="unit" defaultValue={editItem.unit?.toLowerCase()} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-amber-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="kg">Kg</option>
+                                        <option value="liter">Liter</option>
+                                        <option value="pcs">Pcs</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Batas Minimum *</label>
