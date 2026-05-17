@@ -3,6 +3,7 @@ import { Play, CheckCircle2, MapPin, Mail, Phone, Activity, LineChart, Smartphon
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
 import { BackToTop } from "@/components/back-to-top";
+import { ContactForm } from "@/components/landing/contact-form";
 
 export default async function LandingPage() {
     const supabase = await createClient();
@@ -290,35 +291,7 @@ export default async function LandingPage() {
                         <ScrollReveal direction="right" delay={400} className="lg:col-span-3 bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
                             <h3 className="text-lg font-bold text-slate-900 mb-1" style={{ fontFamily: "'Poppins', sans-serif" }}>Kirim Pesan</h3>
                             <p className="text-sm text-slate-400 mb-6">Kami siap membantu kebutuhan peternakan Anda.</p>
-                            <form className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Awal</label>
-                                        <input type="text" placeholder="Naufal" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold mb-1.5 text-slate-700">Nama Akhir</label>
-                                        <input type="text" placeholder="Riyadi" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Alamat Email</label>
-                                    <input type="email" placeholder="naufal@gmail.com" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition" />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Jumlah Ternak</label>
-                                    <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition appearance-none">
-                                        <option>Kurang dari 100</option>
-                                        <option>100 - 500</option>
-                                        <option>500+</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold mb-1.5 text-slate-700">Pesan</label>
-                                    <textarea rows={3} placeholder="Ceritakan tentang operasional Anda..." className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition resize-none"></textarea>
-                                </div>
-                                <button type="button" className="w-full py-3 bg-[#054431] text-white rounded-xl font-bold text-sm hover:bg-[#065a40] transition shadow-lg">Kirim Pesan</button>
-                            </form>
+                            <ContactForm />
                         </ScrollReveal>
                     </div>
                 </div>
