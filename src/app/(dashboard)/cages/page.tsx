@@ -8,9 +8,14 @@ export default async function CagesPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     let avatarUrl: string | null = null;
+    let userName = "Admin";
 
-    if (user && user.user_metadata?.avatar_url) {
-        avatarUrl = user.user_metadata.avatar_url;
+    if (user) {
+        const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
+        if (profile?.name && profile.name !== "New Staff") userName = profile.name;
+        else if (user.user_metadata?.full_name) userName = user.user_metadata.full_name;
+        
+        if (user.user_metadata?.avatar_url) avatarUrl = user.user_metadata.avatar_url;
     }
 
     // Fetch all cages
@@ -81,6 +86,7 @@ export default async function CagesPage() {
             cagesWithStats={cagesWithStats}
             feedItems={feedItems || []}
             avatarUrl={avatarUrl}
+            userName={userName}
         />
     )
 }

@@ -8,9 +8,14 @@ export default async function LivestockPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     let avatarUrl: string | null = null;
+    let userName = "Admin";
 
-    if (user && user.user_metadata?.avatar_url) {
-        avatarUrl = user.user_metadata.avatar_url;
+    if (user) {
+        const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
+        if (profile?.name && profile.name !== "New Staff") userName = profile.name;
+        else if (user.user_metadata?.full_name) userName = user.user_metadata.full_name;
+        
+        if (user.user_metadata?.avatar_url) avatarUrl = user.user_metadata.avatar_url;
     }
 
     // Fetch livestock joined with cage data
@@ -54,6 +59,7 @@ export default async function LivestockPage() {
             cages={cages || []}
             medicines={medicines || []}
             avatarUrl={avatarUrl}
+            userName={userName}
             stats={{ totalAnimals, healthyPercentage, avgWeight, readyToHarvest }}
         />
     )

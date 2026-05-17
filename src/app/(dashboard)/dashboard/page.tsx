@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -7,6 +8,8 @@ import {
 } from "lucide-react";
 import { HealthChart } from "@/components/dashboard/health-chart";
 import { PopulationChart } from "@/components/dashboard/population-chart";
+import { PopulationDropdown } from "@/components/dashboard/population-dropdown";
+import { UserDropdown } from "@/components/dashboard/user-dropdown";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0; // Force no-cache on the entire dashboard route
@@ -34,12 +37,21 @@ export default async function Dashboard() {
 
   const { data: cagesData } = await supabase
     .from("cages")
-    .select("name, current_occupancy")
+    .select("name, current_occupancy, livestocks(gender)")
     .order("name");
 
   const totalCages = cagesData?.length || 0;
   const activeCages = cagesData?.filter(c => c.current_occupancy > 0).length || 0;
-  const populationData = cagesData?.map(c => ({ cage: c.name, occupancy: c.current_occupancy })) || [];
+  const populationData = cagesData?.map(c => {
+    const males = c.livestocks?.filter((l: any) => l.gender === 'male').length || 0;
+    const females = c.livestocks?.filter((l: any) => l.gender === 'female').length || 0;
+    return {
+      cage: c.name,
+      occupancy: c.current_occupancy,
+      males,
+      females
+    };
+  }) || [];
 
   const { count: healthyCount } = await supabase
     .from("livestocks")
@@ -140,23 +152,7 @@ export default async function Dashboard() {
             <HelpCircle className="w-5 h-5" />
           </button>
           <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden sm:block"></div>
-          <div className="flex items-center gap-3">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold leading-none mb-1">{userName}</p>
-              <span className="inline-block px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-full">ONLINE</span>
-            </div>
-            {avatarUrl ? (
-              <img
-                className="w-10 h-10 rounded-full border border-slate-200 object-cover"
-                alt="Profile"
-                src={avatarUrl}
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
-                <Users className="w-5 h-5" />
-              </div>
-            )}
-          </div>
+          <UserDropdown userName={userName} avatarUrl={avatarUrl} showName={true} />
         </div>
       </header>
 
@@ -216,14 +212,12 @@ export default async function Dashboard() {
 
           {/* Bar Chart Section */}
           <div className="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm flex flex-col">
-            <div className="flex items-center justify-between mb-4 shrink-0">
+            <div className="flex items-center justify-between mb-4 shrink-0 relative z-10">
               <div>
                 <h4 className="text-lg font-bold">Populasi per Kandang</h4>
                 <p className="text-xs text-slate-500">Distribusi ternak di setiap area</p>
               </div>
-              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400">
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
+              <PopulationDropdown data={populationData} />
             </div>
             <div className="flex-1 w-full relative min-h-[160px]">
               <div className="absolute inset-0">
