@@ -142,7 +142,7 @@ export default async function LandingPage() {
             <section id="harga" className="py-20 px-4 sm:px-6 lg:px-8 max-w-[1000px] mx-auto overflow-hidden">
                 <ScrollReveal direction="up" className="text-center mb-10 mt-6">
                     <h2 className="text-2xl md:text-3xl font-extrabold mb-3 text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>Pilih Paket Yang Sesuai Untuk Peternakan Anda</h2>
-                    <p className="text-sm text-slate-500 max-w-xl mx-auto leading-relaxed">Kelola hewan ternak Anda dengan presisi digital. Dari peternakan mandiri hingga industri skala besar.</p>
+                    <p className="text-sm text-slate-500 max-w-3xl mx-auto leading-relaxed">Kelola hewan ternak Anda dengan presisi digital. Dari peternakan mandiri hingga industri skala besar.</p>
                 </ScrollReveal>
                 <div className="grid lg:grid-cols-3 gap-6 items-center">
                     {/* Free */}
@@ -159,10 +159,10 @@ export default async function LandingPage() {
                     </ScrollReveal>
                     {/* Pro */}
                     <ScrollReveal direction="up" delay={300} className="bg-[#054431] rounded-[2rem] p-8 shadow-2xl flex flex-col relative h-[460px] z-10 scale-100 lg:scale-[1.05]">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-[#C5FF33] text-[#054431] font-extrabold rounded-full text-xs tracking-wide border-4 border-white">PALING POPULER</div>
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 bg-[#C5FF33] text-[#054431] font-extrabold rounded-full text-xs tracking-wide border-4 border-white whitespace-nowrap">PALING POPULER</div>
                         <h3 className="text-2xl font-bold text-[#C5FF33] mb-1 mt-1" style={{ fontFamily: "'Poppins', sans-serif" }}>Profesional</h3>
                         <p className="text-sm text-emerald-50/70 mb-6">Solusi lengkap untuk peternak ambisius.</p>
-                        <div className="flex items-baseline gap-1 mb-6"><span className="text-4xl font-extrabold text-white leading-none" style={{ fontFamily: "'Poppins', sans-serif" }}>IDR 150.000</span><span className="text-sm text-emerald-50/70"> / Bulan</span></div>
+                        <div className="flex items-baseline gap-1 mb-6"><span className="text-2xl sm:text-3xl lg:text-xl xl:text-3xl font-extrabold text-white leading-none tracking-tight whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif" }}>IDR 150.000</span><span className="text-sm text-emerald-50/70 whitespace-nowrap"> / Bulan</span></div>
                         <ul className="space-y-3 mb-6 flex-1 text-sm text-emerald-50/90">
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Hingga 100 ekor ternak</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Analitik kesehatan AI</li>
