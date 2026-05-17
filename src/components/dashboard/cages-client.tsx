@@ -6,6 +6,7 @@ import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch, updat
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { QrCode } from "lucide-react"
 import dynamic from "next/dynamic"
+import { UserDropdown } from "@/components/dashboard/user-dropdown"
 
 const QrScannerModal = dynamic(
     () => import("@/components/qr/qr-scanner-modal").then(mod => mod.QrScannerModal),
@@ -36,11 +37,13 @@ export type FeedItem = {
 export function CagesClient({
     cagesWithStats,
     feedItems,
-    avatarUrl
+    avatarUrl,
+    userName
 }: {
     cagesWithStats: CageWithStats[],
     feedItems: FeedItem[],
-    avatarUrl: string | null
+    avatarUrl: string | null,
+    userName: string
 }) {
     const [searchQuery, setSearchQuery] = useState("")
     const [filterStatus, setFilterStatus] = useState<"Semua" | "Tersedia" | "Penuh">("Semua")
@@ -286,13 +289,7 @@ export function CagesClient({
                         <PlusCircle className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Kandang Baru</span>
                     </button>
-                    {avatarUrl ? (
-                        <img className="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="Profile" src={avatarUrl} />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
-                            <Users className="w-5 h-5" />
-                        </div>
-                    )}
+                    <UserDropdown avatarUrl={avatarUrl} userName={userName} />
                 </div>
             </header>
 

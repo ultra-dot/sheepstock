@@ -5,6 +5,7 @@ import { Activity, Plus, Stethoscope, Search, Calendar, Filter, Download, Pill, 
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { addHealthRecord, deleteHealthRecord, updateHealthRecord } from "@/app/actions/health"
 import { QrScannerModal } from "@/components/qr/qr-scanner-modal"
+import { UserDropdown } from "@/components/dashboard/user-dropdown"
 
 type HealthRecord = any
 type Livestock = { id: string; qr_code: string; type: string; cage_id: string }
@@ -17,12 +18,14 @@ export function HealthClient({
     cages,
     medicines,
     avatarUrl,
+    userName,
 }: {
     records: HealthRecord[]
     livestocks: Livestock[]
     cages: Cage[]
     medicines: MedicineItem[]
     avatarUrl: string | null
+    userName: string
 }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [viewRecord, setViewRecord] = useState<HealthRecord | null>(null)
@@ -162,13 +165,7 @@ export function HealthClient({
                         <Plus className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Catat Pengobatan</span>
                     </button>
-                    {avatarUrl ? (
-                        <img className="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="Profile" src={avatarUrl} />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
-                            <Users className="w-5 h-5" />
-                        </div>
-                    )}
+                    <UserDropdown avatarUrl={avatarUrl} userName={userName} />
                 </div>
             </header>
 

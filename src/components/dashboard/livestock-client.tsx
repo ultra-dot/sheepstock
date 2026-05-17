@@ -7,6 +7,7 @@ import Link from "next/link"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { addLivestock, updateLivestock, deleteLivestock, getLivestockHistory } from "@/app/actions/livestock"
 import dynamic from "next/dynamic"
+import { UserDropdown } from "@/components/dashboard/user-dropdown"
 
 const QrScannerModal = dynamic(
     () => import("@/components/qr/qr-scanner-modal").then(mod => mod.QrScannerModal),
@@ -20,12 +21,14 @@ export function LivestockClient({
     cages,
     medicines,
     avatarUrl,
+    userName,
     stats
 }: {
     livestocks: Livestock[],
     cages: any[],
     medicines: any[],
     avatarUrl: string | null,
+    userName: string,
     stats: { totalAnimals: number, healthyPercentage: number, avgWeight: string, readyToHarvest: number }
 }) {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -164,13 +167,7 @@ export function LivestockClient({
                         <PlusCircle className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Tambah Ternak</span>
                     </button>
-                    {avatarUrl ? (
-                        <img className="w-10 h-10 rounded-full border border-slate-200 object-cover" alt="Profile" src={avatarUrl} />
-                    ) : (
-                        <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-100 flex items-center justify-center text-slate-400">
-                            <Users className="w-5 h-5" />
-                        </div>
-                    )}
+                    <UserDropdown avatarUrl={avatarUrl} userName={userName} />
                 </div>
             </header>
 
