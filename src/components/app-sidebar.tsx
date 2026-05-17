@@ -133,22 +133,6 @@ export function AppSidebar() {
 
             {/* Footer */}
             <SidebarFooter className="p-4 border-t border-emerald-500/10">
-                {/* Profile Widget */}
-                <div className="flex items-center justify-between p-3 bg-emerald-500/5 rounded-xl mb-3 border border-emerald-500/10 hidden md:flex">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex flex-shrink-0 items-center justify-center text-emerald-600 overflow-hidden">
-                            {avatarUrl ? (
-                                <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                                <UserCircle className="w-5 h-5" />
-                            )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold truncate">{userName}</p>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Logout Button */}
                 <form action={logout} className="w-full">
                     <LogoutButton />
