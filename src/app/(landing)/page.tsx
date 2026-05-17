@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Play, CheckCircle2, MapPin, Mail, Phone, Activity, LineChart, Smartphone, ArrowRight, QrCode, TrendingUp, ClipboardList, LayoutDashboard, UserCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
+import { BackToTop } from "@/components/back-to-top";
 
 export default async function LandingPage() {
     const supabase = await createClient();
@@ -22,11 +23,11 @@ export default async function LandingPage() {
                         <a href="#kontak" className="hover:text-emerald-200 transition">Kontak</a>
                     </div>
                     {user ? (
-                        <Link href="/dashboard" className="px-6 py-2.5 text-sm bg-[#012d1d]/90 hover:bg-[#012d1d] text-white rounded-full font-bold transition shadow-lg flex items-center gap-2">
-                            <LayoutDashboard className="w-4 h-4" /> Buka Dashboard
+                        <Link href="/dashboard" className="px-4 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm bg-[#012d1d]/90 hover:bg-[#012d1d] text-white rounded-full font-bold transition shadow-lg flex items-center gap-2 whitespace-nowrap">
+                            <LayoutDashboard className="w-4 h-4" /> <span className="hidden sm:inline">Buka Dashboard</span><span className="sm:hidden">Dashboard</span>
                         </Link>
                     ) : (
-                        <Link href="/login" className="px-6 py-2.5 text-sm bg-[#012d1d]/90 hover:bg-[#012d1d] text-white rounded-full font-bold transition shadow-lg">
+                        <Link href="/login" className="px-4 py-2 sm:px-6 sm:py-2.5 text-xs sm:text-sm bg-[#012d1d]/90 hover:bg-[#012d1d] text-white rounded-full font-bold transition shadow-lg whitespace-nowrap">
                             Sign in
                         </Link>
                     )}
@@ -34,7 +35,7 @@ export default async function LandingPage() {
             </nav>
 
             {/* HERO */}
-            <section className="relative h-screen max-h-[1080px] overflow-hidden">
+            <section className="relative min-h-[100dvh] lg:min-h-[700px] max-h-[1080px] overflow-hidden flex flex-col">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img src="/assets/image/bg-landingpage.png" alt="" className="w-full h-full object-cover" />
@@ -43,9 +44,9 @@ export default async function LandingPage() {
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, rgba(217,217,217,0.7) 4%, rgba(46,95,76,0.7) 55%, rgba(34,81,72,0.75) 96%)' }}></div>
 
                 {/* Content */}
-                <div className="relative z-10 h-full flex flex-col justify-end pb-14 max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
+                <div className="relative z-10 flex-1 flex flex-col justify-end pt-28 pb-10 md:pb-14 w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
                     <ScrollReveal direction="up" delay={100}>
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[5.2rem] font-semibold text-white leading-[1.05] mb-8 max-w-4xl" style={{ fontFamily: "'Poppins', sans-serif", textShadow: '0 4px 4px rgba(0,0,0,0.25)' }}>
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] xl:text-[5.2rem] font-semibold text-white leading-[1.05] mb-6 md:mb-8 max-w-4xl" style={{ fontFamily: "'Poppins', sans-serif", textShadow: '0 4px 4px rgba(0,0,0,0.25)' }}>
                             Digitalisasi<br/>Peternakan Anda<br/>Dengan<br/>
                             <span style={{ backgroundImage: 'linear-gradient(90deg, #054431 0%, #0DAA7B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SheepStock</span>
                         </h1>
@@ -453,6 +454,7 @@ export default async function LandingPage() {
                     </div>
                 </div>
             </footer>
+            <BackToTop />
         </main>
     );
 }
