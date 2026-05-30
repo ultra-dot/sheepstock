@@ -11,6 +11,9 @@ import { PopulationChart } from "@/components/dashboard/population-chart";
 import { PopulationDropdown } from "@/components/dashboard/population-dropdown";
 import { UserDropdown } from "@/components/dashboard/user-dropdown";
 import { NotificationDropdown } from "@/components/dashboard/notification-dropdown";
+import { GrowthChart } from "@/components/dashboard/growth-chart";
+import { HarvestChart } from "@/components/dashboard/harvest-chart";
+import { IllnessChart } from "@/components/dashboard/illness-chart";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0; // Force no-cache on the entire dashboard route
@@ -162,6 +165,85 @@ export default async function Dashboard() {
   // Sort by time descending, limit to 8
   const recentActivities = activities.sort((a, b) => b.ts - a.ts).slice(0, 8);
 
+  // --- Data for New Charts ---
+  // 1. Illness Data
+  const { data: allHealth } = await supabase.from("health_records").select("illness_description").in("status", ["karantina", "pemulihan", "selesai"]);
+  const illnessCounts: Record<string, number> = {};
+  if (allHealth) {
+    allHealth.forEach(record => {
+      if (record.illness_description) {
+        const desc = record.illness_description.trim();
+        illnessCounts[desc] = (illnessCounts[desc] || 0) + 1;
+      }
+    });
+  }
+  const illnessData = Object.keys(illnessCounts).map(key => ({
+    name: key,
+    value: illnessCounts[key]
+  })).sort((a, b) => b.value - a.value).slice(0, 10);
+
+  // Generate last 6 months keys for padding
+  const monthsList: string[] = [];
+  const tempDate = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(tempDate.getFullYear(), tempDate.getMonth() - i, 1);
+    monthsList.push(d.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' }));
+  }
+
+  // 2. Growth Data
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+  sixMonthsAgo.setDate(1);
+
+  const { data: allWeighing } = await supabase
+    .from("weighing_records")
+    .select("weight, recorded_at")
+    .gte("recorded_at", sixMonthsAgo.toISOString())
+    .order("recorded_at", { ascending: true });
+
+  const growthMap: Record<string, { sum: number, count: number }> = {};
+  monthsList.forEach(m => growthMap[m] = { sum: 0, count: 0 });
+
+  if (allWeighing) {
+    allWeighing.forEach(record => {
+      const date = new Date(record.recorded_at);
+      const monthYear = date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+      if (growthMap[monthYear]) {
+        growthMap[monthYear].sum += record.weight;
+        growthMap[monthYear].count += 1;
+      }
+    });
+  }
+  const growthData = monthsList.map(key => ({
+    month: key,
+    adg: growthMap[key].count > 0 ? parseFloat((growthMap[key].sum / growthMap[key].count).toFixed(2)) : 0
+  }));
+
+  // 3. Harvest Data
+  const { data: allHarvests } = await supabase
+    .from("harvest_records")
+    .select("live_weight, harvest_date")
+    .gte("harvest_date", sixMonthsAgo.toISOString())
+    .eq("status", "completed")
+    .order("harvest_date", { ascending: true });
+
+  const harvestMap: Record<string, number> = {};
+  monthsList.forEach(m => harvestMap[m] = 0);
+
+  if (allHarvests) {
+    allHarvests.forEach(record => {
+      const date = new Date(record.harvest_date);
+      const monthYear = date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+      if (harvestMap[monthYear] !== undefined) {
+        harvestMap[monthYear] += record.live_weight;
+      }
+    });
+  }
+  const harvestData = monthsList.map(key => ({
+    month: key,
+    total: parseFloat(harvestMap[key].toFixed(2))
+  }));
+
   return (
     <>
       {/* Header */}
@@ -299,6 +381,45 @@ export default async function Dashboard() {
                   <span className="text-xs font-semibold">Sakit/Isolasi</span>
                 </div>
                 <span className="text-xs font-bold">{sickCount} Ekor</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Data Visualization */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="glass-card rounded-2xl p-5 shadow-sm flex flex-col">
+            <div className="mb-4 shrink-0">
+              <h4 className="text-lg font-bold">Tren Pertumbuhan Berat</h4>
+              <p className="text-xs text-slate-500">Rata-rata berat 6 bln terakhir</p>
+            </div>
+            <div className="flex-1 w-full relative min-h-[200px]">
+              <div className="absolute inset-0">
+                <GrowthChart data={growthData} />
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-2xl p-5 shadow-sm flex flex-col">
+            <div className="mb-4 shrink-0">
+              <h4 className="text-lg font-bold">Produktivitas Panen</h4>
+              <p className="text-xs text-slate-500">Total berat 6 bln terakhir</p>
+            </div>
+            <div className="flex-1 w-full relative min-h-[200px]">
+              <div className="absolute inset-0">
+                <HarvestChart data={harvestData} />
+              </div>
+            </div>
+          </div>
+
+          <div className="glass-card rounded-2xl p-5 shadow-sm flex flex-col">
+            <div className="mb-4 shrink-0">
+              <h4 className="text-lg font-bold">Analisis Penyakit</h4>
+              <p className="text-xs text-slate-500">Distribusi alasan medis</p>
+            </div>
+            <div className="flex-1 w-full relative min-h-[200px]">
+              <div className="absolute inset-0">
+                <IllnessChart data={illnessData} />
               </div>
             </div>
           </div>
