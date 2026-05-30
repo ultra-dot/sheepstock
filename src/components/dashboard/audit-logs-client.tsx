@@ -58,7 +58,57 @@ export function AuditLogsClient({ logs }: { logs: any[] }) {
                     </div>
 
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
-                        <div className="overflow-x-auto">
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                            {!logs || logs.length === 0 ? (
+                                <div className="text-center py-10 text-slate-500 font-medium text-sm">Belum ada riwayat aktivitas.</div>
+                            ) : (
+                                logs.map((log) => {
+                                    let actionColor = "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400";
+                                    if (log.action === 'CREATE') actionColor = "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400";
+                                    if (log.action === 'UPDATE') actionColor = "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400";
+                                    if (log.action === 'DELETE') actionColor = "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400";
+                                    const isRestorable = (log.old_data || log.action === 'CREATE') && log.entity_type !== 'harvest' && log.entity_type !== 'cages_move';
+
+                                    return (
+                                        <div key={log.id} className="p-4 space-y-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider ${actionColor}`}>{log.action}</span>
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase">{log.entity_type}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                                                    <Clock className="w-3 h-3" />
+                                                    {new Date(log.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}
+                                                </div>
+                                            </div>
+                                            <p className="text-xs font-medium text-slate-800 dark:text-slate-100 leading-relaxed">{log.description}</p>
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                                                    <UserIcon className="w-3.5 h-3.5 text-slate-400" />
+                                                    {log.profiles?.name || 'User Terhapus'}
+                                                </div>
+                                                {isRestorable && (
+                                                    <button
+                                                        onClick={() => setConfirmDialog({
+                                                            isOpen: true,
+                                                            logId: log.id,
+                                                            message: `Apakah Anda yakin ingin melakukan RESTORE untuk aksi ini?\n\n"${log.description}"\n\nAksi ini akan dicatat di log.`
+                                                        })}
+                                                        disabled={isPending}
+                                                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:hover:bg-amber-900/40 dark:text-amber-500 rounded-lg text-[10px] font-bold transition-colors disabled:opacity-50"
+                                                    >
+                                                        <RotateCcw className="w-3 h-3" /> Restore
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            )}
+                        </div>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left border-collapse min-w-[900px]">
                                 <thead>
                                     <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">

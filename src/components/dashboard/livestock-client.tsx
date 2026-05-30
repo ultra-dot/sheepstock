@@ -205,7 +205,7 @@ export function LivestockClient({
                         <QrCode className="w-5 h-5 shrink-0" />
                         <span className="hidden sm:inline">Scan QR</span>
                     </button>
-                    <Link href="/livestock/import" className="hidden md:flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-100 transition-all font-semibold text-sm shadow-sm shrink-0">
+                    <Link href="/livestock/import" className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-100 transition-all font-semibold text-sm shadow-sm shrink-0">
                         <FileSpreadsheet className="w-5 h-5 shrink-0" />
                         <span className="hidden lg:inline">Import Data</span>
                     </Link>
@@ -284,7 +284,67 @@ export function LivestockClient({
 
                     {/* Glassmorphism Table Container */}
                     <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-slate-800/50 rounded-xl shadow-xl overflow-hidden glass-card">
-                        <div className="overflow-x-auto">
+                        {/* Mobile Card View */}
+                        <div className="md:hidden divide-y divide-emerald-500/5">
+                            {paginatedData.length === 0 ? (
+                                <div className="text-center py-10 text-slate-500 font-medium text-sm">Belum ada data ternak.</div>
+                            ) : (
+                                paginatedData.map(animal => {
+                                    const isMale = animal.gender === 'male';
+                                    const genderColor = isMale ? "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400" : "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-400";
+                                    let statusClass = "bg-stone-100 text-stone-700 border-stone-200 dark:bg-stone-900 dark:text-stone-400 dark:border-stone-800";
+                                    let statusLabel = animal.status.toUpperCase();
+                                    if (animal.status === 'healthy') { statusClass = "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-400 dark:border-emerald-800"; statusLabel = "Sehat"; }
+                                    else if (animal.status === 'sick') { statusClass = "bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/40 dark:text-rose-400 dark:border-rose-800"; statusLabel = "Sakit"; }
+                                    else if (animal.status === 'sold') { statusClass = "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-400 dark:border-blue-800"; statusLabel = "Dijual"; }
+
+                                    return (
+                                        <div key={animal.id} className="p-4 space-y-3 hover:bg-emerald-500/5 transition-colors">
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">{animal.qr_code}</span>
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border shadow-sm ${statusClass}`}>{statusLabel}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                                <span className="capitalize">{animal.type}</span>
+                                                <span>•</span>
+                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${genderColor}`}>{isMale ? "Jantan" : "Betina"}</span>
+                                                <span>•</span>
+                                                <span>{animal.cages?.name || '-'}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{animal.current_weight} Kg</span>
+                                                <div className="flex items-center gap-1">
+                                                    <button onClick={() => handleViewDetail(animal)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-blue-500/10 text-slate-400 hover:text-blue-600 transition-all" title="Detail">
+                                                        <Eye className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={async () => {
+                                                        setDetailLivestock(animal);
+                                                        setEditLivestockStatus(animal.status);
+                                                        setSelectedKeluhan("");
+                                                        setSelectedDiagnosa("");
+                                                        setActiveHealthRecord(null);
+                                                        if (animal.status === 'sick') {
+                                                            try {
+                                                                const history = await getLivestockHistory(animal.id);
+                                                                const active = history.healthRecords.find((hr: any) => hr.status === 'karantina' || hr.status === 'pemulihan');
+                                                                if (active) { setActiveHealthRecord(active); setSelectedKeluhan(active.illness_description || ""); setSelectedDiagnosa(active.treatment || ""); }
+                                                            } catch (err) { console.error("Failed to load health record", err); }
+                                                        }
+                                                    }} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-emerald-500/10 text-slate-400 hover:text-emerald-600 transition-all" title="Edit">
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => handleDeleteLivestock(animal.id, animal.qr_code, animal.cage_id)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 transition-all" title="Hapus">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            )}
+                        </div>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
                             <table className="w-full text-left border-collapse min-w-[800px]">
                                 <thead>
                                     <tr className="bg-emerald-500/5 border-b border-emerald-500/10">

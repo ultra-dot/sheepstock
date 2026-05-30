@@ -190,7 +190,74 @@ export function InventoryClient({
 
                 {/* Inventory Table */}
                 <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-emerald-500/10 rounded-xl shadow-xl overflow-hidden glass-card">
-                    <div className="overflow-x-auto">
+                    {/* Mobile Card View */}
+                    <div className="md:hidden divide-y divide-emerald-500/5">
+                        {filteredItems.length === 0 ? (
+                            <div className="text-center py-10 text-slate-500 font-medium text-sm">Gudang kosong atau tidak ada hasil pencarian.</div>
+                        ) : (
+                            filteredItems.map((item) => {
+                                const isLow = item.current_stock <= item.min_stock_alert;
+                                const isOut = item.current_stock === 0;
+                                let TypeIcon = Box;
+                                let iconColorClass = "bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400";
+                                if (['feed', 'pakan'].includes(item.type?.toLowerCase())) { TypeIcon = Wheat; iconColorClass = "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"; }
+                                else if (['medicine', 'obat'].includes(item.type?.toLowerCase())) { TypeIcon = Pill; iconColorClass = "bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400"; }
+                                else if (['vaccine', 'vaksin'].includes(item.type?.toLowerCase())) { TypeIcon = Syringe; iconColorClass = "bg-rose-100 text-rose-600 dark:bg-rose-900/40 dark:text-rose-400"; }
+                                else if (['equipment', 'peralatan'].includes(item.type?.toLowerCase())) { TypeIcon = Wrench; iconColorClass = "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"; }
+
+                                return (
+                                    <div key={item.id} className="p-4 space-y-3 hover:bg-emerald-500/5 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3 min-w-0">
+                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${iconColorClass}`}>
+                                                    <TypeIcon className="w-4 h-4" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{item.name}</p>
+                                                    <p className="text-[10px] text-slate-400 capitalize font-medium">{item.type}</p>
+                                                </div>
+                                            </div>
+                                            {isOut ? (
+                                                <span className="px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 text-[10px] font-bold flex items-center gap-1 border border-rose-200 dark:border-rose-800 shrink-0">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Habis
+                                                </span>
+                                            ) : isLow ? (
+                                                <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-[10px] font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-800 shrink-0">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Menipis
+                                                </span>
+                                            ) : (
+                                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800 shrink-0">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Aman
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-4 text-xs">
+                                                <div>
+                                                    <span className="text-[10px] text-slate-400 uppercase font-bold">Stok: </span>
+                                                    <span className={`font-bold ${isOut ? 'text-rose-600' : isLow ? 'text-amber-600' : 'text-slate-700 dark:text-slate-300'}`}>{item.current_stock} {item.unit}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] text-slate-400 uppercase font-bold">Min: </span>
+                                                    <span className="font-medium text-slate-500">{item.min_stock_alert} {item.unit}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                                <button onClick={() => setEditItem(item)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-amber-500/10 text-slate-400 hover:text-amber-500 transition-all" title="Edit">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+                                                </button>
+                                                <button onClick={() => handleDeleteItem(item.id, item.name)} className="w-8 h-8 rounded-lg inline-flex items-center justify-center hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 transition-all" title="Hapus">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        )}
+                    </div>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead>
                                 <tr className="bg-emerald-500/5 border-b border-emerald-500/10">

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useMemo, useEffect, useRef } from "react"
-import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat, Users } from "lucide-react"
+import { useState, useMemo, useEffect } from "react"
+import { Search, PlusCircle, MoreVertical, Plus, Edit2, Trash2, ArrowRightLeft, Wheat } from "lucide-react"
 import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch } from "@/app/actions/cages"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { QrCode } from "lucide-react"
@@ -301,7 +301,7 @@ export function CagesClient({
                     </div>
                     <button
                         onClick={() => setIsBulkFeedModalOpen(true)}
-                        className="hidden md:flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shrink-0"
+                        className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shrink-0"
                     >
                         <Wheat className="w-5 h-5 shrink-0" />
                         <span className="hidden lg:inline">Beri Pakan Massal</span>

@@ -58,7 +58,7 @@ export function LoginForm({
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('/assets/image/background-login.png')` }}
+          style={{ backgroundImage: `url('/assets/image/background-login.webp')` }}
         />
         {/* Gradient Overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />

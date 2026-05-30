@@ -39,7 +39,7 @@ export default async function LandingPage() {
             <section className="relative min-h-[100dvh] lg:min-h-[700px] max-h-[1080px] overflow-hidden flex flex-col">
                 {/* Background Image */}
                 <div className="absolute inset-0">
-                    <img src="/assets/image/bg-landingpage.png" alt="" className="w-full h-full object-cover" />
+                    <img src="/assets/image/bg-landingpage.webp" alt="" className="w-full h-full object-cover" />
                 </div>
                 {/* Green Gradient Overlay */}
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(105deg, rgba(217,217,217,0.7) 4%, rgba(46,95,76,0.7) 55%, rgba(34,81,72,0.75) 96%)' }}></div>
@@ -117,7 +117,7 @@ export default async function LandingPage() {
 
                     {/* RIGHT: Image + CTA */}
                     <ScrollReveal direction="right" delay={200} className="flex flex-col items-end justify-between gap-5">
-                        <img src="/assets/image/banner-lp-2.png" alt="Farm" className="rounded-2xl shadow-lg object-cover w-full aspect-[4/3]" />
+                        <img src="/assets/image/banner-lp-2.webp" alt="Farm" className="rounded-2xl shadow-lg object-cover w-full aspect-[4/3]" />
                         <Link href="#harga" className="inline-flex items-center gap-2 px-6 py-3 bg-[#054431] hover:bg-[#065a40] text-white rounded-full font-bold text-sm shadow-lg transition">
                             Pelajari Lebih Lanjut
                         </Link>
@@ -128,7 +128,7 @@ export default async function LandingPage() {
             {/* BANNER */}
             <section className="relative overflow-hidden">
                 <div className="absolute inset-0">
-                    <img src="/assets/image/banner-lp-1.png" alt="" className="w-full h-full object-cover" />
+                    <img src="/assets/image/banner-lp-1.webp" alt="" className="w-full h-full object-cover" />
                 </div>
                 <div className="absolute inset-0 bg-[#1B4332]/85"></div>
                 <ScrollReveal direction="up" className="relative z-10 max-w-3xl mx-auto text-center px-4 py-14">

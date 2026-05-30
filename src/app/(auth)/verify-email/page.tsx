@@ -119,7 +119,7 @@ function VerifyEmailContent() {
             <div className="relative hidden lg:flex flex-col justify-center p-8 lg:p-12 overflow-hidden bg-zinc-900">
                 <div 
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url('/assets/image/background-login.png')` }}
+                    style={{ backgroundImage: `url('/assets/image/background-login.webp')` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#012D1D]/90 via-[#012D1D]/20 to-transparent" />
 

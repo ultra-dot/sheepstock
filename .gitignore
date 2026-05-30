@@ -41,13 +41,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+
 # Docs
-DOKUMENTASI_MODUL_DAN_COMMIT.md
-Design_Specification.md
-src/ui_wireframe_plan.md
+docs/*.md
+!docs/PROJECT_CONTEXT.md
 
 # AI Assistant artifacts
 implementation_*.md
 walkthrough_*.md
 task.md
 *.sql
+/sql/

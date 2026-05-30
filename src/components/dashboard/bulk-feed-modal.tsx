@@ -207,7 +207,51 @@ export function BulkFeedModal({
                         
                         <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800/50">
                             <div className="max-h-60 overflow-y-auto">
-                                <table className="w-full text-sm text-left">
+                                {/* Mobile Card View */}
+                                <div className="md:hidden divide-y divide-slate-200 dark:divide-slate-700">
+                                    {activeCages.length === 0 ? (
+                                        <div className="px-4 py-8 text-center text-slate-500 text-sm">Tidak ada kandang yang aktif</div>
+                                    ) : activeCages.map(cage => {
+                                        const dist = cageDistributions[cage.id];
+                                        if (!dist) return null;
+                                        return (
+                                            <div key={cage.id} className={`p-3.5 space-y-2.5 transition-colors ${dist.selected ? 'bg-white dark:bg-slate-900' : 'opacity-50'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={dist.selected}
+                                                        onChange={() => toggleCage(cage.id)}
+                                                        className="w-4 h-4 text-emerald-500 rounded focus:ring-emerald-500 cursor-pointer shrink-0"
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-bold text-sm text-slate-700 dark:text-slate-200 truncate">{cage.name}</div>
+                                                        {cage.ui.fedToday && (
+                                                            <div className="text-[10px] text-emerald-500 font-medium">Sudah diberi pakan hari ini</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between pl-7">
+                                                    <span className="text-xs text-slate-500 font-medium">{cage.current_occupancy} ekor</span>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="text-[10px] text-slate-400 font-bold">Porsi:</span>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            min="0"
+                                                            value={dist.amountStr}
+                                                            onChange={(e) => updateAmount(cage.id, e.target.value)}
+                                                            disabled={!dist.selected}
+                                                            className="w-20 px-2 py-1 text-right bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
+                                                        />
+                                                        <span className="text-[10px] text-slate-400 font-medium">Kg</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                {/* Desktop Table View */}
+                                <table className="hidden md:table w-full text-sm text-left">
                                     <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs uppercase font-bold sticky top-0 z-10">
                                         <tr>
                                             <th className="px-4 py-3 w-10 text-center">

@@ -61,7 +61,7 @@ export function RegisterForm({
         {/* Background Image Placeholder */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('/assets/image/background-login.png')` }}
+          style={{ backgroundImage: `url('/assets/image/background-login.webp')` }}
         />
         {/* Gradient Overlay for text readability */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#012D1D]/90 via-[#012D1D]/20 to-transparent" />
