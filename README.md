@@ -22,7 +22,7 @@
 
 ## ✨ Tentang Proyek
 
-**SheepStock** adalah platform manajemen peternakan berbasis web yang dibangun untuk membantu peternak domba dan kambing mengelola operasional harian mereka secara digital. Dari pencatatan ternak, manajemen kandang, inventaris pakan, hingga pelacakan kesehatan — semuanya terintegrasi dalam satu dashboard yang intuitif dan modern.
+**SheepStock** adalah platform manajemen peternakan berbasis web yang dibangun untuk membantu peternak domba dan kambing mengelola operasional harian mereka secara digital. Dari pencatatan ternak, manajemen kandang, inventaris pakan, hingga pelacakan kesehatan — semuanya terintegrasi dalam satu dashboard yang intuitif, modern, dan sangat responsif.
 
 Proyek ini dikembangkan sebagai bagian dari mata kuliah **Rekayasa Perangkat Lunak (RPL)** di **IPB University**.
 
@@ -30,28 +30,46 @@ Proyek ini dikembangkan sebagai bagian dari mata kuliah **Rekayasa Perangkat Lun
 
 ## 🚀 Fitur Unggulan
 
-### 📊 Dashboard Interaktif
+### 📊 Dashboard Interaktif & Responsif
 - Statistik real-time: total ternak, tingkat kesehatan, rata-rata berat badan
-- Grafik populasi per kandang (Radar Chart)
-- Grafik distribusi kesehatan ternak
+- Visualisasi data tingkat lanjut (Populasi, Pertumbuhan/ADG, Status Kesehatan)
+- Desain *Glassmorphism* modern
+- **Mobile-First Data Views:** Semua tabel data (Livestock, Health, Inventory, Audit Logs) otomatis berubah menjadi *Card View* di layar smartphone untuk UX yang maksimal.
 
-### 🐑 Inventori Ternak
+### 🐑 Manajemen & Inventori Ternak
 - CRUD data ternak (domba & kambing) lengkap
 - Auto-generate ID unik untuk setiap ternak baru
+- Fitur Harvest/Panen (Pencatatan ternak terjual atau mati)
 - Filter, search, dan pagination data
 
-### 🏠 Manajemen Kandang
+### 🏠 Manajemen Kandang & Pakan Massal
 - Kartu kandang visual dengan progress bar kapasitas
 - Fitur **Mutasi Ternak** antar kandang (batch move)
-- Pencatatan pemberian pakan per kandang
+- **Beri Pakan Massal (Bulk Feeding):** Distribusi pakan ke beberapa kandang sekaligus dengan kalkulasi otomatis pemotongan stok gudang.
 - Status kebersihan kandang
 
 ### 📷 Auto-Tagging QR Code
 - **Generate QR Code** otomatis untuk setiap ternak
 - **Cetak label stiker** dalam layout grid 3-kolom (siap gunting)
 - Dukungan berbagai ukuran kertas (A4, F4, Letter)
-- **Scan QR via kamera** HP/Laptop langsung dari browser
+- **Scan QR via kamera** HP/Laptop langsung dari browser (dengan fitur *fast-scan timbang*)
 - Switch kamera depan/belakang untuk tablet & HP
+
+### 📦 Inventaris Pakan & Obat
+- Pencatatan stok gudang (pakan, obat, vaksin, peralatan)
+- Riwayat transaksi masuk/keluar
+- Alert stok menipis dengan badge indikator warna
+- Support aset optimasi `.webp` agar dashboard tetap ringan
+
+### 🏥 Rekam Medis Kesehatan
+- Pencatatan riwayat penyakit dan tindakan pengobatan
+- Status: Sehat, Sakit, Karantina, Pemulihan
+- Keterkaitan langsung dengan stok obat gudang
+
+### 🛡️ Keamanan & Audit Logs (Checkpoint)
+- **Role-Based Access Control (RBAC):** Admin (Full Access) & Staff (Limited Access)
+- **Audit Logs:** Perekaman aktivitas mutasi sistem (CREATE, UPDATE, DELETE).
+- **Fitur Restore (Checkpoint):** Memungkinkan admin membatalkan kesalahan mutasi data kembali ke state sebelumnya.
 
 ### 📋 Laporan & Cetak
 - Generate laporan profesional (kop surat, tabel, tanda tangan)
@@ -59,23 +77,9 @@ Proyek ini dikembangkan sebagai bagian dari mata kuliah **Rekayasa Perangkat Lun
 - Print-optimized layout dengan `@media print`
 - Blok tanda tangan anti-terpotong halaman
 
-### 📦 Inventaris Pakan & Obat
-- Pencatatan stok gudang (pakan, obat, vitamin)
-- Riwayat transaksi masuk/keluar
-- Alert stok menipis
-
-### 🏥 Rekam Medis Kesehatan
-- Pencatatan riwayat kesehatan per ternak
-- Status: Sehat, Sakit, Karantina
-
-### 🔐 Autentikasi
-- Login & Register dengan email
-- Verifikasi email
-- Session management via Supabase Auth
-
 ### 🌐 Landing Page
 - Desain modern dengan animasi Web3-inspired
-- Responsive design untuk semua perangkat
+- Gambar aset terkompresi `.webp` (Super Fast Load)
 - Embedded interactive map (IPB University)
 - Form kontak terintegrasi
 
@@ -93,7 +97,6 @@ Proyek ini dikembangkan sebagai bagian dari mata kuliah **Rekayasa Perangkat Lun
 | **Charts** | Recharts |
 | **QR Code** | react-qr-code, @yudiel/react-qr-scanner |
 | **Icons** | Lucide React |
-| **Deployment** | Vercel |
 
 ---
 
@@ -101,26 +104,21 @@ Proyek ini dikembangkan sebagai bagian dari mata kuliah **Rekayasa Perangkat Lun
 
 ```
 sheepstock/
-├── public/                    # Aset statis (logo, gambar)
+├── docs/                      # Dokumentasi, File Konteks AI (PROJECT_CONTEXT.md), Wireframes
+├── public/                    # Aset statis (logo, gambar optimasi .webp)
+├── sql/                       # Migrasi Supabase, Skema DB, dan Utility Scripts SQL
 ├── src/
 │   ├── app/
 │   │   ├── (auth)/            # Halaman autentikasi (login, register, verify)
-│   │   ├── (dashboard)/       # Halaman dashboard
-│   │   │   ├── cages/         # Manajemen kandang
-│   │   │   ├── dashboard/     # Overview dashboard
-│   │   │   ├── health/        # Rekam medis kesehatan
-│   │   │   ├── inventory/     # Inventaris pakan & obat
-│   │   │   ├── livestock/     # Inventori ternak + QR tags
-│   │   │   ├── reports/       # Generator laporan
-│   │   │   └── settings/      # Pengaturan akun
+│   │   ├── (dashboard)/       # Halaman dashboard (cages, harvest, health, inventory, livestock, dll)
 │   │   ├── (landing)/         # Landing page publik
-│   │   └── actions/           # Server Actions (auth, cages, inventory, livestock)
+│   │   └── actions/           # Server Actions (auth, cages, inventory, livestock, audit)
 │   ├── components/
-│   │   ├── dashboard/         # Komponen khusus dashboard
+│   │   ├── dashboard/         # Komponen khusus dashboard & Client Views
 │   │   ├── qr/                # QR Scanner & Sticker Grid
 │   │   ├── reports/           # Template laporan
 │   │   └── ui/                # shadcn/ui components
-│   └── lib/                   # Utilities & Supabase client
+│   └── lib/                   # Utilities & Supabase SSR client
 ├── .env.example               # Template environment variables
 ├── package.json
 └── tsconfig.json
@@ -162,6 +160,8 @@ NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 ```
 
+*(Catatan: Jangan lupa me-run file SQL dari folder `sql/` ke SQL Editor Supabase Anda untuk setup awal)*
+
 ### 4. Jalankan Development Server
 
 ```bash
@@ -170,41 +170,24 @@ npm run dev
 
 Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
 
-### 5. Build untuk Production
-
-```bash
-npm run build
-npm start
-```
-
----
-
-## 📸 Screenshots
-
-> _Screenshots akan ditambahkan segera._
-
-<!-- 
-Uncomment dan isi path screenshot:
-| Dashboard | Inventori Ternak | QR Scanner |
-|---|---|---|
-| ![Dashboard](docs/ss-dashboard.png) | ![Livestock](docs/ss-livestock.png) | ![QR](docs/ss-qr.png) |
--->
-
 ---
 
 ## 🗂️ Database Schema
 
-Aplikasi ini menggunakan **Supabase PostgreSQL** dengan Row Level Security (RLS). Tabel utama:
+Aplikasi ini menggunakan **Supabase PostgreSQL** dengan arsitektur multi-tenant via Row Level Security (RLS). Tabel utama:
 
 | Tabel | Deskripsi |
 |---|---|
-| `profiles` | Data profil pengguna |
-| `livestocks` | Data ternak (domba/kambing) |
-| `cages` | Data kandang & kapasitas |
-| `health_records` | Riwayat kesehatan ternak |
-| `inventory_items` | Stok gudang (pakan, obat) |
-| `inventory_transactions` | Riwayat transaksi inventaris |
-| `feeding_logs` | Log pemberian pakan |
+| `profiles` | Data profil dan role pengguna (Admin/Staff) |
+| `livestocks` | Data ternak inti (domba/kambing, berat, gender) |
+| `cages` | Data kandang, status, & kapasitas |
+| `health_records` | Riwayat rekam medis dan pengobatan |
+| `inventory_items` | Gudang pakan, obat, vaksin, dan peralatan |
+| `inventory_transactions` | Riwayat keluar masuk inventaris |
+| `feeding_records` | Pencatatan pemberian pakan |
+| `weighing_records` | Historis penimbangan berat badan (ADG) |
+| `harvest` | Data penjualan dan mortalitas ternak |
+| `audit_logs` | Log aktivitas mutasi beserta checkpoint data (JSONB) |
 
 ---
 
