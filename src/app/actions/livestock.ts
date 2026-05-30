@@ -278,3 +278,91 @@ export async function getLivestockHistory(livestockId: string) {
         weighingRecords: weighingRecords || []
     }
 }
+
+export async function importLivestocksBatch(livestocksData: any[]) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    const effectiveUserId = await getEffectiveUserId()
+
+    // Filter out rows that are entirely empty or don't have QR Code
+    const validRows = livestocksData.filter(row => row.qr_code && row.qr_code.trim() !== "");
+    if (validRows.length === 0) throw new Error("Tidak ada data valid untuk diimport.");
+
+    // Extract all QR codes to check for duplicates in DB
+    const qrCodes = validRows.map(row => row.qr_code.trim());
+    
+    const { data: existingQrs } = await supabase
+        .from("livestocks")
+        .select("qr_code")
+        .in("qr_code", qrCodes);
+
+    if (existingQrs && existingQrs.length > 0) {
+        const dups = existingQrs.map(r => r.qr_code).join(", ");
+        throw new Error(`Terdapat QR Code yang sudah ada di sistem: ${dups}`);
+    }
+
+    // Build insert array
+    const now = new Date().toISOString();
+    const insertData = validRows.map(row => {
+        const weight = parseFloat(row.weight) || 0;
+        return {
+            qr_code: row.qr_code.trim(),
+            type: row.type || "domba",
+            gender: row.gender || "male",
+            age_months: parseInt(row.age_months) || 0,
+            initial_weight: weight,
+            current_weight: weight,
+            cage_id: row.cage_id, // assuming UI resolves Cage Name -> Cage ID before sending here
+            status: "healthy", // Default for new imported
+            entry_date: now,
+            user_id: effectiveUserId
+        };
+    });
+
+    // 1. Insert livestocks
+    const { data: insertedLivestocks, error: insertError } = await supabase
+        .from("livestocks")
+        .insert(insertData)
+        .select("id, initial_weight, cage_id");
+
+    if (insertError) throw new Error(`Gagal mengimport: ${insertError.message}`);
+
+    // 2. Insert initial weighing records
+    if (insertedLivestocks && insertedLivestocks.length > 0) {
+        const weighingData = insertedLivestocks.map(l => ({
+            livestock_id: l.id,
+            weight: l.initial_weight,
+            scanned_by: user.id,
+            user_id: effectiveUserId
+        }));
+        await supabase.from("weighing_records").insert(weighingData);
+
+        // 3. Update Cage Occupancy (group by cage_id)
+        const cagesToUpdate = Array.from(new Set(insertedLivestocks.map(l => l.cage_id).filter(Boolean)));
+        for (const cid of cagesToUpdate) {
+            const cageIdStr = cid as string;
+            const { data: cageInfo } = await supabase.from("cages").select("capacity, status").eq("id", cageIdStr).single();
+            if (cageInfo) {
+                const { count } = await supabase.from("livestocks").select("*", { count: 'exact', head: true }).in("status", ["healthy", "sick"]).eq("cage_id", cageIdStr);
+                const occupancy = count || 0;
+                let newStatus = cageInfo.status;
+                if (newStatus !== "maintenance") {
+                    newStatus = occupancy >= cageInfo.capacity ? 'full' : (occupancy > 0 ? 'optimal' : 'available');
+                }
+                await supabase.from("cages").update({
+                    current_occupancy: occupancy,
+                    status: newStatus
+                }).eq("id", cageIdStr);
+            }
+        }
+
+        // 4. Audit Log
+        await createAuditLog('CREATE', 'livestock', `Import massal ${insertedLivestocks.length} ekor ternak`, undefined, null, null);
+    }
+
+    revalidatePath("/livestock")
+    revalidatePath("/cages")
+    revalidatePath("/dashboard")
+}

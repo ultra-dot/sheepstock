@@ -198,3 +198,51 @@ export async function updateCageCleaningStatus(id: string, isCleaned: boolean) {
     revalidatePath("/cages")
     revalidatePath("/dashboard")
 }
+
+export async function feedMultipleCages(inventoryId: string, distributions: { cage_id: string, amount: number }[]) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    const effectiveUserId = await getEffectiveUserId()
+
+    if (!distributions || distributions.length === 0) {
+        throw new Error("Tidak ada kandang yang dipilih untuk diberi pakan.")
+    }
+
+    const totalAmount = distributions.reduce((sum, d) => sum + d.amount, 0)
+    if (totalAmount <= 0) {
+        throw new Error("Total jumlah pakan harus lebih besar dari 0.")
+    }
+
+    // 1. Validasi stok pakan
+    const { data: item } = await supabase.from("inventory_items").select("name, current_stock").eq("id", inventoryId).single()
+    if (!item) throw new Error("Item pakan tidak ditemukan")
+    if (item.current_stock < totalAmount) throw new Error(`Stok pakan tidak mencukupi (Sisa: ${item.current_stock} Kg, Dibutuhkan: ${totalAmount} Kg)`)
+
+    // 2. Persiapkan insert records
+    const feedRecords = distributions.map(d => {
+        return {
+            cage_id: d.cage_id,
+            item_id: inventoryId,
+            quantity_given: Number(d.amount.toFixed(2)),
+            recorded_by: user.id,
+            user_id: effectiveUserId
+        }
+    })
+
+    // 3. Insert multiple records
+    const { error: insertError } = await supabase.from("feeding_records").insert(feedRecords)
+    if (insertError) throw new Error(insertError.message)
+
+    // 4. Kurangi stok
+    const newStock = Math.max(0, item.current_stock - totalAmount)
+    await supabase.from("inventory_items").update({ current_stock: newStock }).eq("id", inventoryId)
+
+    // 5. Audit Log
+    await createAuditLog('CREATE', 'feeding_records', `Pemberian pakan massal custom (${item.name}) total ${totalAmount} Kg ke ${distributions.length} kandang`, undefined, null, null)
+
+    revalidatePath("/cages")
+    revalidatePath("/inventory")
+    revalidatePath("/dashboard")
+}

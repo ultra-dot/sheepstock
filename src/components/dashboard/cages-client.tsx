@@ -7,6 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { QrCode } from "lucide-react"
 import dynamic from "next/dynamic"
 import { UserDropdown } from "@/components/dashboard/user-dropdown"
+import { BulkFeedModal } from "@/components/dashboard/bulk-feed-modal"
 
 const QrScannerModal = dynamic(
     () => import("@/components/qr/qr-scanner-modal").then(mod => mod.QrScannerModal),
@@ -24,7 +25,7 @@ export type CageWithStats = {
     stats: { maleCount: number, femaleCount: number }
     occupants: any[]
     capacityPercentage: number
-    ui: { statusDot: string, statusText: string, statusLabel: string, progressColor: string, progressBg: string }
+    ui: { statusDot: string, statusText: string, statusLabel: string, progressColor: string, progressBg: string, fedToday: boolean }
 }
 
 export type FeedItem = {
@@ -69,11 +70,16 @@ export function CagesClient({
     const [moveStep, setMoveStep] = useState<1 | 2>(1)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const ITEMS_PER_PAGE = 5
-
     // Dialog states
     const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean, title: string, message: string, onConfirm: () => void} | null>(null)
     const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
     const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+    
+    // Bulk feed states
+    const [isBulkFeedModalOpen, setIsBulkFeedModalOpen] = useState(false)
+    const totalOccupancy = useMemo(() => {
+        return cagesWithStats.reduce((sum, c) => sum + c.current_occupancy, 0)
+    }, [cagesWithStats])
 
     const openMoveModal = (cageId: string) => {
         setMoveSourceCageId(cageId);
@@ -306,6 +312,13 @@ export function CagesClient({
                         />
                     </div>
                     <button
+                        onClick={() => setIsBulkFeedModalOpen(true)}
+                        className="hidden md:flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-3 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shrink-0"
+                    >
+                        <Wheat className="w-5 h-5 shrink-0" />
+                        <span className="hidden lg:inline">Beri Pakan Massal</span>
+                    </button>
+                    <button
                         onClick={() => setIsAddModalOpen(true)}
                         className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-500/90 text-white px-3 sm:px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md shrink-0"
                     >
@@ -385,6 +398,17 @@ export function CagesClient({
                                         <div className={`h-2 w-full rounded-full overflow-hidden ${cage.ui.progressBg}`}>
                                             <div className={`h-full rounded-full ${cage.ui.progressColor}`} style={{ width: `${cage.capacityPercentage}%` }}></div>
                                         </div>
+                                    </div>
+
+                                    {/* Feeding Status */}
+                                    <div className={`p-2.5 rounded-xl border flex items-center justify-between transition-colors ${cage.ui.fedToday ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800' : 'bg-rose-50 dark:bg-rose-900/10 border-rose-200 dark:border-rose-800'}`}>
+                                        <div className="flex items-center gap-2">
+                                            <Wheat className={`w-4 h-4 ${cage.ui.fedToday ? 'text-emerald-600' : 'text-rose-500'}`} />
+                                            <span className={`text-xs font-bold ${cage.ui.fedToday ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}`}>
+                                                {cage.ui.fedToday ? 'Sudah Diberi Pakan' : 'Belum Diberi Pakan'}
+                                            </span>
+                                        </div>
+                                        <div className={`w-2 h-2 rounded-full ${cage.ui.fedToday ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></div>
                                     </div>
 
                                     {/* Environment Stats & Distribution */}
@@ -954,6 +978,14 @@ export function CagesClient({
                     </div>
                 </div>
             )}
+
+            <BulkFeedModal 
+                isOpen={isBulkFeedModalOpen} 
+                onClose={() => setIsBulkFeedModalOpen(false)} 
+                feedItems={feedItems} 
+                cages={cagesWithStats} 
+                onSuccess={(msg) => setSuccessDialog({ isOpen: true, title: "Pakan Berhasil Dibagikan", message: msg })}
+            />
         </div>
     )
 }

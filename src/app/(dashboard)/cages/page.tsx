@@ -30,11 +30,21 @@ export default async function CagesPage() {
         .select("*")
         .in("status", ["healthy", "sick"]) // only count active animals
 
+    // Fetch today's feeding records
+    const todayStr = new Date().toISOString().split('T')[0]
+    const { data: feedingRecords } = await supabase
+        .from("feeding_records")
+        .select("cage_id, recorded_at")
+        .gte("recorded_at", `${todayStr}T00:00:00Z`)
+
     if (!cages) return <div className="p-6">Gagal memuat data kandang.</div>
 
     // Calculate stats for each cage
     const cagesWithStats = cages.map(cage => {
         const occupants = livestocks?.filter(l => l.cage_id === cage.id) || []
+        
+        // Check if cage was fed today
+        const fedToday = feedingRecords?.some(r => r.cage_id === cage.id) || false;
 
         const maleCount = occupants.filter(l => l.gender === 'male').length
         const femaleCount = occupants.filter(l => l.gender === 'female').length
@@ -69,7 +79,7 @@ export default async function CagesPage() {
             stats: { maleCount, femaleCount },
             occupants,
             capacityPercentage: Math.min(capacityPercentage, 100),
-            ui: { statusDot, statusText, statusLabel, progressColor, progressBg }
+            ui: { statusDot, statusText, statusLabel, progressColor, progressBg, fedToday }
         }
     })
 
