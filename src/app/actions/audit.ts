@@ -34,6 +34,16 @@ export async function restoreCheckpoint(logId: string) {
     const entityType = log.entity_type
     const entityId = log.entity_id
 
+    // Map entity_type to actual database table name
+    const tableMap: Record<string, string> = {
+        'livestock': 'livestocks',
+        'cage': 'cages',
+        'cages': 'cages',
+        'profiles': 'profiles'
+    }
+
+    const tableName = tableMap[entityType] || entityType
+
     // 3. Process Restore Based on Action
     try {
         if (log.action === 'UPDATE') {
@@ -45,7 +55,7 @@ export async function restoreCheckpoint(logId: string) {
             const payload = { ...log.old_data }
             
             const { error: updateError } = await supabase
-                .from(entityType)
+                .from(tableName)
                 .update(payload)
                 .eq('id', entityId)
 
@@ -67,7 +77,7 @@ export async function restoreCheckpoint(logId: string) {
             const payload = { ...log.old_data }
             
             const { error: insertError } = await supabase
-                .from(entityType)
+                .from(tableName)
                 .insert(payload)
 
             if (insertError) throw insertError
@@ -86,7 +96,7 @@ export async function restoreCheckpoint(logId: string) {
             if (!entityId) throw new Error("ID tidak valid.")
             
             const { error: deleteError } = await supabase
-                .from(entityType)
+                .from(tableName)
                 .delete()
                 .eq('id', entityId)
 
