@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { createAuditLog } from "@/lib/audit"
+import { getEffectiveUserId } from "@/app/actions/users"
 
 export async function createCage(formData: FormData) {
     const supabase = await createClient()
@@ -17,13 +18,15 @@ export async function createCage(formData: FormData) {
     const rawTemp = formData.get("temperature") as string | null
     const temperature = rawTemp ? (parseFloat(rawTemp.replace(',', '.')) || 30.5) : 30.5
 
+    const effectiveUserId = await getEffectiveUserId()
+
     const { data: newCage, error } = await supabase.from("cages").insert({
         name,
         capacity,
         current_occupancy: 0,
         status,
         temperature,
-        user_id: user.id
+        user_id: effectiveUserId
     }).select().single()
 
     if (error) {
@@ -33,6 +36,7 @@ export async function createCage(formData: FormData) {
     await createAuditLog('CREATE', 'cages', `Membuat kandang baru: ${name}`, newCage.id, null, newCage)
 
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }
 
 export async function deleteCage(id: string) {
@@ -56,6 +60,7 @@ export async function deleteCage(id: string) {
     await createAuditLog('DELETE', 'cages', `Menghapus kandang: ${cage?.name || id}`, id, cage, null)
 
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }
 
 export async function updateCage(id: string, formData: FormData) {
@@ -85,6 +90,7 @@ export async function updateCage(id: string, formData: FormData) {
     await createAuditLog('UPDATE', 'cages', `Memperbarui data kandang: ${name}`, id, oldCage, updatedCage)
 
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }
 
 export async function moveLivestockBatch(targetCageId: string, sourceCageId: string, livestockIds: string[]) {
@@ -129,10 +135,11 @@ export async function moveLivestockBatch(targetCageId: string, sourceCageId: str
     await updateCageOccupancy(sourceCageId);
     await updateCageOccupancy(targetCageId);
 
-    await createAuditLog('UPDATE', 'cages_move', `Memindahkan ${livestockIds.length} ekor domba dari kandang ${sourceCageId} ke ${targetCageId}`, undefined, null, null)
+    await createAuditLog('UPDATE', 'cages_move', `Memindahkan ${livestockIds.length} ekor ternak dari kandang ${sourceCageId} ke ${targetCageId}`, undefined, null, null)
 
     revalidatePath("/cages")
     revalidatePath("/livestock")
+    revalidatePath("/dashboard")
 }
 
 // Action for Beri Pakan
@@ -147,27 +154,30 @@ export async function feedCage(formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     // 2. Insert feeding record
     const { error: feedError } = await supabase.from("feeding_records").insert({
         cage_id,
         item_id,
         quantity_given,
         recorded_by: user.id,
-        user_id: user.id
+        user_id: effectiveUserId
     })
 
     if (feedError) throw new Error(feedError.message)
 
     // 3. Deduct from inventory (scoped to current user's items)
-    const { data: item } = await supabase.from("inventory_items").select("current_stock").eq("id", item_id).eq("user_id", user.id).single()
+    const { data: item } = await supabase.from("inventory_items").select("current_stock").eq("id", item_id).eq("user_id", effectiveUserId).single()
 
     if (item) {
         const newStock = Math.max(0, item.current_stock - quantity_given)
-        await supabase.from("inventory_items").update({ current_stock: newStock }).eq("id", item_id).eq("user_id", user.id)
+        await supabase.from("inventory_items").update({ current_stock: newStock }).eq("id", item_id).eq("user_id", effectiveUserId)
     }
 
     revalidatePath("/cages")
     revalidatePath("/inventory")
+    revalidatePath("/dashboard")
 }
 
 export async function updateCageCleaningStatus(id: string, isCleaned: boolean) {
@@ -186,4 +196,5 @@ export async function updateCageCleaningStatus(id: string, isCleaned: boolean) {
     }
 
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }

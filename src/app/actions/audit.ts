@@ -12,8 +12,8 @@ export async function restoreCheckpoint(logId: string) {
     if (!user) throw new Error("Akses ditolak")
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'admin') {
-        throw new Error("Hanya administrator yang dapat melakukan restore data.")
+    if (profile?.role !== 'admin' && profile?.role !== 'owner') {
+        throw new Error("Hanya owner atau administrator yang dapat melakukan restore data.")
     }
 
     // 2. Fetch the log

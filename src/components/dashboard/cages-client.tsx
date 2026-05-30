@@ -792,7 +792,7 @@ export function CagesClient({
                                                             {animal.qr_code || animal.id.substring(0, 8)}
                                                         </span>
                                                         <span className="text-xs font-medium text-slate-500 capitalize bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md">
-                                                            Domba - {animal.gender === 'male' ? 'Jantan' : 'Betina'}
+                                                            {animal.type === 'kambing' ? 'Kambing' : 'Domba'} - {animal.gender === 'male' ? 'Jantan' : 'Betina'}
                                                         </span>
                                                     </div>
                                                 </label>

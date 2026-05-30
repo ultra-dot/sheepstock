@@ -9,6 +9,24 @@ import { createClient } from "@/lib/supabase/client"
 export default function SettingsPage() {
     const [stockNotif, setStockNotif] = useState(true);
     const [vaccineNotif, setVaccineNotif] = useState(true);
+
+    useEffect(() => {
+        setStockNotif(localStorage.getItem('setting_stock_notif') !== 'false');
+        setVaccineNotif(localStorage.getItem('setting_vaccine_notif') !== 'false');
+    }, []);
+
+    const toggleStockNotif = () => {
+        const newVal = !stockNotif;
+        setStockNotif(newVal);
+        localStorage.setItem('setting_stock_notif', String(newVal));
+    };
+
+    const toggleVaccineNotif = () => {
+        const newVal = !vaccineNotif;
+        setVaccineNotif(newVal);
+        localStorage.setItem('setting_vaccine_notif', String(newVal));
+    };
+
     const [userEmail, setUserEmail] = useState<string | null>("Memuat...");
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [userName, setUserName] = useState<string>("Memuat...");
@@ -23,8 +41,8 @@ export default function SettingsPage() {
     const [isUploading, setIsUploading] = useState(false);
 
     // Dialog states
-    const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null);
-    const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null);
+    const [errorDialog, setErrorDialog] = useState<{ isOpen: boolean, title: string, message: string } | null>(null);
+    const [successDialog, setSuccessDialog] = useState<{ isOpen: boolean, title: string, message: string } | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -37,7 +55,7 @@ export default function SettingsPage() {
 
                 // Fetch profile data
                 const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-                
+
                 let displayName = "Tanpa Nama";
                 if (profile?.name && profile.name !== "New Staff") {
                     displayName = profile.name;
@@ -47,9 +65,9 @@ export default function SettingsPage() {
 
                 setUserName(displayName);
                 setEditName(displayName);
-                
+
                 if (profile) {
-                    setUserRole(profile.role === 'admin' ? 'Administrator' : 'Staf');
+                    setUserRole(profile.role === 'owner' ? 'Owner Peternakan' : profile.role === 'admin' ? 'Administrator' : 'Staf');
                 }
             } else {
                 setUserEmail("Pengguna tidak ditemukan");
@@ -65,7 +83,7 @@ export default function SettingsPage() {
         try {
             setIsSavingProfile(true);
             const supabase = createClient();
-            
+
             // 1. Update profiles table
             const { error: profileError } = await supabase
                 .from('profiles')
@@ -270,7 +288,7 @@ export default function SettingsPage() {
                                         <p className="text-sm text-slate-500 mt-0.5">Dapatkan peringatan ketika pakan atau obat di bawah batas minimum.</p>
                                     </div>
                                     <button
-                                        onClick={() => setStockNotif(!stockNotif)}
+                                        onClick={toggleStockNotif}
                                         className={`w-12 h-6 rounded-full relative transition-colors duration-300 ease-in-out flex-shrink-0 ${stockNotif ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-sm ${stockNotif ? 'translate-x-7' : 'translate-x-1'}`}></div>
@@ -284,7 +302,7 @@ export default function SettingsPage() {
                                         <p className="text-sm text-slate-500 mt-0.5">Pengingat pintar untuk jadwal vaksin dan pemeriksaan kesehatan otomatis.</p>
                                     </div>
                                     <button
-                                        onClick={() => setVaccineNotif(!vaccineNotif)}
+                                        onClick={toggleVaccineNotif}
                                         className={`w-12 h-6 rounded-full relative transition-colors duration-300 ease-in-out flex-shrink-0 ${vaccineNotif ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-700'}`}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ease-in-out shadow-sm ${vaccineNotif ? 'translate-x-7' : 'translate-x-1'}`}></div>
@@ -294,7 +312,7 @@ export default function SettingsPage() {
                         </div>
 
                         {/* Admin Only: Audit Logs */}
-                        {userRole === 'Administrator' && (
+                        {(userRole === 'Administrator' || userRole === 'Owner Peternakan') && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-blue-500/20 rounded-3xl p-4 sm:p-6 glass-card flex flex-col justify-between gap-4 h-full">
                                     <div>
@@ -341,7 +359,7 @@ export default function SettingsPage() {
                                     className="px-6 py-2.5 bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 font-bold rounded-xl transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 inline-flex items-center gap-2"
                                 >
                                     <LogOut className="w-4 h-4" />
-                                    Keluar (Logout)
+                                    Keluar
                                 </button>
                             </form>
                         </div>
@@ -357,7 +375,7 @@ export default function SettingsPage() {
                         <div className="p-6">
                             <div className="flex justify-center mb-4">
                                 <div className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
                                 </div>
                             </div>
                             <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{errorDialog.title}</h3>
@@ -379,7 +397,7 @@ export default function SettingsPage() {
                         <div className="p-6">
                             <div className="flex justify-center mb-4">
                                 <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><path d="m9 11 3 3L22 4" /></svg>
                                 </div>
                             </div>
                             <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{successDialog.title}</h3>

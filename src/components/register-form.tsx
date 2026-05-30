@@ -18,6 +18,7 @@ export function RegisterForm({
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showLoading, setShowLoading] = useState(false)
+  const [role, setRole] = useState<'owner' | 'staff'>('owner')
   const router = useRouter()
 
   // When registration succeeds, show loading then redirect to verify-email
@@ -119,6 +120,37 @@ export function RegisterForm({
               </div>
             )}
 
+            {/* Hidden Input for Role */}
+            <input type="hidden" name="role" value={role} />
+
+            {/* Segmented Button for Role Selection */}
+            <div className="p-1 bg-slate-100 dark:bg-slate-800 rounded-xl flex gap-1 mb-2">
+              <button
+                type="button"
+                onClick={() => setRole('owner')}
+                className={cn(
+                  "flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer",
+                  role === 'owner' 
+                    ? "bg-[#003B26] text-white shadow-sm" 
+                    : "text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                Owner Peternakan
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('staff')}
+                className={cn(
+                  "flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer",
+                  role === 'staff' 
+                    ? "bg-[#003B26] text-white shadow-sm" 
+                    : "text-slate-600 hover:bg-slate-200"
+                )}
+              >
+                Staff / Pegawai
+              </button>
+            </div>
+
             <div className="space-y-1.5">
               <label htmlFor="name" className="text-[10px] font-bold text-[#1E1E1E] uppercase tracking-wide font-sans ml-1">
                 Nama Lengkap*
@@ -132,6 +164,24 @@ export function RegisterForm({
                 className="h-[44px] bg-[#EBEFEF] border-0 rounded-xl px-4 text-sm text-black placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-[#024431]"
               />
             </div>
+
+            {/* Conditional Referral Code Field for Staff */}
+            {role === 'staff' && (
+              <div className="space-y-1.5 animate-fadeIn">
+                <label htmlFor="referralCode" className="text-[10px] font-bold text-[#1E1E1E] uppercase tracking-wide font-sans ml-1">
+                  Kode Referral Owner*
+                </label>
+                <Input
+                  id="referralCode"
+                  name="referralCode"
+                  type="text"
+                  placeholder="REF-XXXXXX"
+                  required
+                  className="h-[44px] bg-[#EBEFEF] border-0 rounded-xl px-4 text-sm text-black placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-[#024431] uppercase"
+                />
+                <p className="text-[10px] text-slate-500 ml-1">Dapatkan kode dari pemilik peternakan.</p>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label htmlFor="email" className="text-[10px] font-bold text-[#1E1E1E] uppercase tracking-wide font-sans ml-1">

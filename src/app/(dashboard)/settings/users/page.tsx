@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { UsersClient } from "@/components/dashboard/users-client"
-import { getAllProfiles } from "@/app/actions/users"
+import { getAllProfiles, getOwnerReferralCode } from "@/app/actions/users"
 
 export const dynamic = 'force-dynamic'
 
@@ -17,11 +17,11 @@ export default async function UsersPage() {
     // Check role
     const { data: profile } = await supabase.from('profiles').select('name, role').eq('id', user.id).single()
 
-    if (profile?.role !== 'admin') {
+    if (profile?.role !== 'owner' && profile?.role !== 'admin') {
         redirect('/dashboard')
     }
 
-    let userName = "Admin Peternakan"
+    let userName = "Owner Peternakan"
     let avatarUrl = null
 
     if (profile?.name && profile.name !== "New Staff") {
@@ -35,6 +35,7 @@ export default async function UsersPage() {
     }
 
     const profiles = await getAllProfiles()
+    const referralCode = await getOwnerReferralCode()
 
     return (
         <UsersClient 
@@ -42,6 +43,7 @@ export default async function UsersPage() {
             currentUserId={user.id}
             userName={userName}
             avatarUrl={avatarUrl}
+            referralCode={referralCode}
         />
     )
 }

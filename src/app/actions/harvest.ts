@@ -23,7 +23,7 @@ export async function processHarvest(formData: FormData) {
     }
 
     if (livestockData.length === 0) {
-        throw new Error("Tidak ada domba yang dipilih untuk diproses.");
+        throw new Error("Tidak ada ternak yang dipilih untuk diproses.");
     }
 
     // Carcass weight is only relevant for "potong" (which is currently restricted to single processing anyway)
@@ -149,7 +149,7 @@ export async function processHarvest(formData: FormData) {
     await createAuditLog(
         'CREATE', 
         'harvest', 
-        `Memproses ${harvestType} untuk ${livestockData.length} ekor domba kepada pembeli: ${customerName}`,
+        `Memproses ${harvestType} untuk ${livestockData.length} ekor ternak kepada pembeli: ${customerName}`,
         undefined,
         null,
         livestockData
@@ -159,4 +159,5 @@ export async function processHarvest(formData: FormData) {
     revalidatePath('/harvest');
     revalidatePath('/livestock');
     revalidatePath('/cages');
+    revalidatePath('/dashboard');
 }

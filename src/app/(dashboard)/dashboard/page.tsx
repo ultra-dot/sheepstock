@@ -4,12 +4,13 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/server";
 import {
   Users, Warehouse, AlertTriangle, TrendingUp, Percent, Box,
-  Search, Bell, HelpCircle, MoreHorizontal, PlusCircle, Syringe, AlertCircle
+  Search, HelpCircle, MoreHorizontal, PlusCircle, Syringe, AlertCircle
 } from "lucide-react";
 import { HealthChart } from "@/components/dashboard/health-chart";
 import { PopulationChart } from "@/components/dashboard/population-chart";
 import { PopulationDropdown } from "@/components/dashboard/population-dropdown";
 import { UserDropdown } from "@/components/dashboard/user-dropdown";
+import { NotificationDropdown } from "@/components/dashboard/notification-dropdown";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0; // Force no-cache on the entire dashboard route
@@ -32,10 +33,31 @@ export default async function Dashboard() {
     if (user.user_metadata?.avatar_url) avatarUrl = user.user_metadata.avatar_url;
   }
 
+  // Fetch recent notifications (top 5 latest audit logs)
+  const { data: recentLogs } = await supabase
+    .from('audit_logs')
+    .select('id, description, created_at, action')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const notifications = [...(recentLogs || [])];
+
+
+  // Check if we need a vaccination reminder (Mock condition: random check or at least 1 livestock exists)
   const { count: totalPopulation } = await supabase
     .from("livestocks")
     .select("*", { count: "exact", head: true })
     .in("status", ["healthy", "sick"]);
+
+  if (totalPopulation && totalPopulation > 0) {
+    // We add a generic reminder for vaccination checks for the whole farm
+    notifications.unshift({
+      id: 'vaccine-reminder',
+      description: `Jadwal Vaksinasi & Pemeriksaan: Periksa ternak Anda bulan ini untuk menjaga populasi tetap sehat.`,
+      created_at: new Date().toISOString(),
+      action: 'ALERT_VACCINE'
+    });
+  }
 
   const { data: cagesData } = await supabase
     .from("cages")
@@ -67,11 +89,20 @@ export default async function Dashboard() {
 
   const { data: inventoryItems } = await supabase
     .from("inventory_items")
-    .select("name, current_stock, min_stock_alert");
+    .select("id, name, current_stock, min_stock_alert");
 
   const lowStockItems = inventoryItems?.filter(
     (item) => item.current_stock <= item.min_stock_alert
   ) || [];
+
+  lowStockItems.forEach(item => {
+    notifications.unshift({
+      id: `stock-${item.id}`,
+      description: `Peringatan Stok: ${item.name} sisa ${item.current_stock} (Batas min: ${item.min_stock_alert})`,
+      created_at: new Date().toISOString(),
+      action: 'ALERT_STOCK'
+    });
+  });
 
   // Fetch recent health records
   const { data: recentHealth } = await supabase
@@ -147,14 +178,12 @@ export default async function Dashboard() {
           </div>
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-          <button className="relative w-10 h-10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <Bell className="w-5 h-5" />
-          </button>
+          <NotificationDropdown notifications={notifications} userRole={userRole} />
           <button className="hidden sm:flex w-10 h-10 items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
             <HelpCircle className="w-5 h-5" />
           </button>
           <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden sm:block"></div>
-          <UserDropdown userName={userName} avatarUrl={avatarUrl} showName={true} />
+          <UserDropdown userName={userName} avatarUrl={avatarUrl} showName={true} userRole={userRole} />
         </div>
       </header>
 
@@ -165,17 +194,12 @@ export default async function Dashboard() {
           <div>
             <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Hai, {userName}!</h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-              {userRole === 'admin' 
-                ? <><span className="text-purple-500 font-bold">Administrator</span> | Ringkasan operasional MitraTani hari ini.</>
+              {(userRole === 'owner' || userRole === 'admin')
+                ? <><span className="text-purple-500 font-bold">{userRole === 'owner' ? 'Owner Peternakan' : 'Administrator'}</span> | Ringkasan operasional MitraTani hari ini.</>
                 : <><span className="text-emerald-500 font-bold">Staff Peternakan</span> | Jadwal dan status operasional hari ini.</>
               }
             </p>
           </div>
-          {userRole === 'admin' && (
-            <div className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-4 py-2 rounded-xl text-sm font-bold border border-purple-200 dark:border-purple-800">
-              Akses Penuh
-            </div>
-          )}
         </div>
 
         {/* Stats Cards */}

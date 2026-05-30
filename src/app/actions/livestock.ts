@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { createAuditLog } from "@/lib/audit"
+import { getEffectiveUserId } from "@/app/actions/users"
 
 export async function addLivestock(formData: FormData) {
     const supabase = await createClient()
@@ -23,6 +24,8 @@ export async function addLivestock(formData: FormData) {
         throw new Error("QR Code atau ID sudah terdaftar!")
     }
 
+    const effectiveUserId = await getEffectiveUserId()
+
     const { data: newLivestock, error: insertError } = await supabase.from("livestocks").insert({
         qr_code,
         type,
@@ -33,21 +36,22 @@ export async function addLivestock(formData: FormData) {
         cage_id,
         status,
         entry_date: new Date().toISOString(),
-        user_id: user.id
+        user_id: effectiveUserId
     }).select().single()
 
     if (insertError) {
         throw new Error(insertError.message)
     }
 
-    await createAuditLog('CREATE', 'livestock', `Menambahkan domba baru dengan QR: ${qr_code}`, newLivestock.id, null, newLivestock)
+    const typeDisplay = type === 'kambing' ? 'kambing' : 'domba';
+    await createAuditLog('CREATE', 'livestock', `Menambahkan ${typeDisplay} baru dengan QR: ${qr_code}`, newLivestock.id, null, newLivestock)
 
     // Insert an initial weighing record for analytics
     await supabase.from("weighing_records").insert({
         livestock_id: newLivestock.id,
         weight: initial_weight,
         scanned_by: user.id,
-        user_id: user.id
+        user_id: effectiveUserId
     })
 
     // Synchronize Target Cage Occupancy
@@ -68,6 +72,7 @@ export async function addLivestock(formData: FormData) {
 
     revalidatePath("/livestock")
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }
 
 export async function updateLivestock(id: string, formData: FormData) {
@@ -103,7 +108,7 @@ export async function updateLivestock(id: string, formData: FormData) {
         throw new Error(updateError.message)
     }
 
-    await createAuditLog('UPDATE', 'livestock', `Memperbarui data domba dengan QR: ${qr_code}`, id, oldDataFull, updatedData)
+    await createAuditLog('UPDATE', 'livestock', `Memperbarui data ternak dengan QR: ${qr_code}`, id, oldDataFull, updatedData)
 
     // Sync health records based on status
     if (status === 'sick') {
@@ -115,6 +120,8 @@ export async function updateLivestock(id: string, formData: FormData) {
 
         // Always create a new health record ticket if illness is provided
         if (illness) {
+            const effectiveUserId = await getEffectiveUserId()
+
             const { error: insertErr } = await supabase.from("health_records").insert({
                 livestock_id: id,
                 date: new Date().toISOString().split('T')[0],
@@ -124,7 +131,7 @@ export async function updateLivestock(id: string, formData: FormData) {
                 medicine_qty: isNaN(medicine_qty) ? null : medicine_qty,
                 status: health_status,
                 recorded_by: user.id,
-                user_id: user.id
+                user_id: effectiveUserId
             });
 
             if (insertErr) {
@@ -162,11 +169,12 @@ export async function updateLivestock(id: string, formData: FormData) {
 
     // Add weighing record if weight changed
     if (oldData && oldData.current_weight !== current_weight) {
+        const effectiveUserId = await getEffectiveUserId()
         await supabase.from("weighing_records").insert({
             livestock_id: id,
             weight: current_weight,
             scanned_by: user.id,
-            user_id: user.id
+            user_id: effectiveUserId
         })
     }
 
@@ -197,6 +205,7 @@ export async function updateLivestock(id: string, formData: FormData) {
     revalidatePath("/livestock")
     revalidatePath("/cages")
     revalidatePath("/health")
+    revalidatePath("/dashboard")
 }
 
 export async function deleteLivestock(id: string, cageId: string) {
@@ -204,10 +213,12 @@ export async function deleteLivestock(id: string, cageId: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     // Get current record to know which cage it belongs to if cageId isn't passed reliably
     const { data: livestock } = await supabase.from("livestocks").select("*").eq("id", id).single()
 
-    const { error } = await supabase.from("livestocks").delete().eq("id", id).eq("user_id", user.id)
+    const { error } = await supabase.from("livestocks").delete().eq("id", id).eq("user_id", effectiveUserId)
 
     if (error) {
         if (error.code === '23503' || error.message.includes('foreign key constraint')) {
@@ -216,7 +227,7 @@ export async function deleteLivestock(id: string, cageId: string) {
         throw new Error(error.message)
     }
 
-    await createAuditLog('DELETE', 'livestock', `Menghapus data domba dengan QR: ${livestock?.qr_code || 'Tidak diketahui'}`, id, livestock, null)
+    await createAuditLog('DELETE', 'livestock', `Menghapus data ternak dengan QR: ${livestock?.qr_code || 'Tidak diketahui'}`, id, livestock, null)
 
     // Update cage occupancy
     const targetCageId = livestock?.cage_id || cageId
@@ -239,6 +250,7 @@ export async function deleteLivestock(id: string, cageId: string) {
 
     revalidatePath("/livestock")
     revalidatePath("/cages")
+    revalidatePath("/dashboard")
 }
 
 export async function getLivestockHistory(livestockId: string) {

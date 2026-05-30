@@ -9,9 +9,9 @@ export default async function AuditLogsPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect("/login")
 
-    // 2. Verify Role (Admin only)
+    // 2. Verify Role (Owner/Admin only)
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-    if (!profile || profile.role !== 'admin') {
+    if (!profile || (profile.role !== 'admin' && profile.role !== 'owner')) {
         redirect("/dashboard")
     }
 

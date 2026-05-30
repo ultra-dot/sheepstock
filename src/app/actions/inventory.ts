@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { getEffectiveUserId } from "@/app/actions/users"
 
 export async function updateStock(itemId: string, quantity: number, type: 'in' | 'out') {
     const supabase = await createClient()
@@ -36,6 +37,7 @@ export async function updateStock(itemId: string, quantity: number, type: 'in' |
     }
 
     revalidatePath("/inventory")
+    revalidatePath("/dashboard")
 }
 
 export async function addInventoryItem(formData: FormData) {
@@ -53,13 +55,15 @@ export async function addInventoryItem(formData: FormData) {
     if (isNaN(current_stock) || current_stock < 0) throw new Error("Stok awal harus angka positif")
     if (isNaN(min_stock_alert) || min_stock_alert < 0) throw new Error("Batas minimum harus angka positif")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     const { error } = await supabase.from("inventory_items").insert({
         name,
         type,
         unit,
         current_stock,
         min_stock_alert,
-        user_id: user.id
+        user_id: effectiveUserId
     })
 
     if (error) {
@@ -67,6 +71,7 @@ export async function addInventoryItem(formData: FormData) {
     }
 
     revalidatePath("/inventory")
+    revalidatePath("/dashboard")
 }
 
 export async function deleteInventoryItem(itemId: string) {
@@ -74,13 +79,16 @@ export async function deleteInventoryItem(itemId: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
-    const { error } = await supabase.from("inventory_items").delete().eq("id", itemId).eq("user_id", user.id)
+    const effectiveUserId = await getEffectiveUserId()
+
+    const { error } = await supabase.from("inventory_items").delete().eq("id", itemId).eq("user_id", effectiveUserId)
 
     if (error) {
         throw new Error(error.message)
     }
 
     revalidatePath("/inventory")
+    revalidatePath("/dashboard")
 }
 
 export async function updateInventoryItem(itemId: string, formData: FormData) {
@@ -96,16 +104,19 @@ export async function updateInventoryItem(itemId: string, formData: FormData) {
     if (!name || !type || !unit) throw new Error("Semua field wajib diisi")
     if (isNaN(min_stock_alert) || min_stock_alert < 0) throw new Error("Batas minimum harus angka positif")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     const { error } = await supabase.from("inventory_items").update({
         name,
         type,
         unit,
         min_stock_alert,
-    }).eq("id", itemId).eq("user_id", user.id)
+    }).eq("id", itemId).eq("user_id", effectiveUserId)
 
     if (error) {
         throw new Error(error.message)
     }
 
     revalidatePath("/inventory")
+    revalidatePath("/dashboard")
 }

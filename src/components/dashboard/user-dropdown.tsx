@@ -4,7 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Users, Settings, LogOut, LayoutDashboard } from "lucide-react";
 
-export function UserDropdown({ userName = "Admin", avatarUrl, showName = false }: { userName?: string, avatarUrl: string | null, showName?: boolean }) {
+export function UserDropdown({ userName = "Admin", avatarUrl, showName = false, userRole }: { userName?: string, avatarUrl: string | null, showName?: boolean, userRole?: string }) {
+  const roleLabel = userRole === 'owner' ? 'Owner Peternakan' : userRole === 'admin' ? 'Administrator' : userRole === 'staff' ? 'Staff Peternakan' : userRole || 'Staff';
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +57,7 @@ export function UserDropdown({ userName = "Admin", avatarUrl, showName = false }
             )}
             <div className="flex flex-col overflow-hidden">
                 <span className="text-sm font-bold text-slate-800 dark:text-white leading-tight truncate">{userName}</span>
-                <span className="text-[10px] text-slate-500 mt-0.5">Administrator</span>
+                <span className="text-[10px] text-slate-500 mt-0.5">{roleLabel}</span>
             </div>
           </div>
           

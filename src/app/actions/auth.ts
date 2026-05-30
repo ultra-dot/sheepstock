@@ -36,9 +36,32 @@ export async function register(prevState: any, formData: FormData) {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const passwordConfirm = formData.get('passwordConfirm') as string
+    const role = formData.get('role') as string || 'owner'
+    const referralCode = formData.get('referralCode') as string
 
     if (password !== passwordConfirm) {
         return { error: 'Konfirmasi kata sandi tidak cocok.' }
+    }
+
+    let ownerId: string | null = null
+
+    if (role === 'staff') {
+        if (!referralCode || referralCode.trim() === '') {
+            return { error: 'Kode referral wajib diisi untuk pendaftaran Staff.' }
+        }
+
+        const { data: owner, error: ownerError } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('referral_code', referralCode.trim().toUpperCase())
+            .eq('role', 'owner')
+            .maybeSingle()
+
+        if (ownerError || !owner) {
+            return { error: 'Kode referral tidak valid atau pemilik peternakan tidak ditemukan.' }
+        }
+
+        ownerId = owner.id
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -47,6 +70,8 @@ export async function register(prevState: any, formData: FormData) {
         options: {
             data: {
                 full_name: name,
+                role,
+                owner_id: ownerId,
             },
             emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback`,
         }

@@ -318,7 +318,7 @@ export function HarvestClient({
         if (found) {
             setScannedLivestock(found)
         } else {
-            setErrorDialog({ isOpen: true, title: "Ternak Tidak Ditemukan", message: `Domba dengan ID ${cleanedCode} tidak ditemukan, mati, atau sudah terjual.` });
+            setErrorDialog({ isOpen: true, title: "Ternak Tidak Ditemukan", message: `Ternak dengan ID ${cleanedCode} tidak ditemukan, mati, atau sudah terjual.` });
         }
     }
 
@@ -380,7 +380,7 @@ export function HarvestClient({
                                 {selectedForSale.length}
                             </div>
                             <div>
-                                <p className="font-bold text-sm sm:text-base">Domba Terpilih</p>
+                                <p className="font-bold text-sm sm:text-base">Ternak Terpilih</p>
                                 <p className="text-[10px] sm:text-xs text-sky-100">Siap untuk dijual hidup</p>
                             </div>
                         </div>
@@ -539,7 +539,7 @@ export function HarvestClient({
                         {/* Table 2: Bebas Jual Hidup */}
                         <div className="space-y-4">
                             <h3 className="text-[11px] sm:text-sm font-bold text-slate-500 uppercase tracking-wider px-2 flex items-center gap-2">
-                                <Truck className="w-4 h-4 text-sky-500 shrink-0"/> <span className="truncate">Katalog Semua Domba (Jual Hidup)</span>
+                                <Truck className="w-4 h-4 text-sky-500 shrink-0"/> <span className="truncate">Katalog Semua Ternak (Jual Hidup)</span>
                             </h3>
                             <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-sky-500/10 rounded-3xl shadow-xl overflow-hidden glass-card">
                                 {/* Mobile: Select All Header */}
@@ -551,7 +551,7 @@ export function HarvestClient({
                                         }
                                         Pilih Semua
                                     </button>
-                                    <span className="text-[10px] text-slate-400 font-bold">{filteredSemuaDomba.length} domba</span>
+                                    <span className="text-[10px] text-slate-400 font-bold">{filteredSemuaDomba.length} ternak</span>
                                 </div>
                                 {/* Mobile Card View */}
                                 <div className="md:hidden divide-y divide-sky-500/5 max-h-[400px] overflow-y-auto">
@@ -781,7 +781,7 @@ export function HarvestClient({
                         <div className="w-16 h-16 mx-auto bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 rounded-full flex items-center justify-center mb-4">
                             <QrCode className="w-8 h-8" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">Domba Ditemukan!</h3>
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1">Ternak Ditemukan!</h3>
                         <p className="text-sm text-slate-500 mb-6">
                             ID: <span className="font-bold text-slate-700 dark:text-slate-300">{scannedLivestock.qr_code}</span> • 
                             Berat: <span className="font-bold text-slate-700 dark:text-slate-300">{displayWeight(scannedLivestock.current_weight)}</span> • 
@@ -819,7 +819,7 @@ export function HarvestClient({
                         <div className="p-4 sm:p-6 border-b border-emerald-500/10 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 rounded-t-3xl z-10">
                             <div>
                                 <h3 className={`text-lg font-bold ${harvestType === 'potong' ? 'text-rose-600 dark:text-rose-400' : 'text-sky-600 dark:text-sky-400'} flex items-center gap-2`}>
-                                    {harvestType === 'potong' ? <><Scissors className="w-5 h-5"/> Proses Pemotongan</> : <><Truck className="w-5 h-5"/> Proses Jual Hidup {selectedLivestocks.length > 1 ? `(${selectedLivestocks.length} Domba)` : ''}</>}
+                                    {harvestType === 'potong' ? <><Scissors className="w-5 h-5"/> Proses Pemotongan</> : <><Truck className="w-5 h-5"/> Proses Jual Hidup {selectedLivestocks.length > 1 ? `(${selectedLivestocks.length} Ternak)` : ''}</>}
                                 </h3>
                                 {selectedLivestocks.length === 1 && (
                                     <p className="text-xs text-slate-500 mt-1">ID Ternak: <span className="font-bold text-slate-700 dark:text-slate-300">{selectedLivestocks[0].qr_code}</span></p>
@@ -855,7 +855,7 @@ export function HarvestClient({
                                             onClick={() => setWeighingMethod('satuan')}
                                             className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 ${weighingMethod === 'satuan' ? 'bg-white text-sky-600 shadow-sm dark:bg-slate-700 dark:text-sky-400' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                         >
-                                            Satuan (Per Domba)
+                                            Satuan (Per Ternak)
                                         </button>
                                     </div>
                                 </div>
@@ -902,7 +902,7 @@ export function HarvestClient({
                             {/* Satuan Pricing (Bulk only) */}
                             {harvestType === 'jual_hidup' && selectedLivestocks.length > 1 && weighingMethod === 'satuan' && (
                                 <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Input Spesifik Per Domba</label>
+                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Input Spesifik Per Ternak</label>
                                     {selectedLivestocks.map((lv, idx) => (
                                         <div key={lv.id} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl space-y-3">
                                             <div className="flex items-center justify-between">

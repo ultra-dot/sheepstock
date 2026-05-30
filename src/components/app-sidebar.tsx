@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle, FileText, Scissors } from "lucide-react"
+import { Activity, Box, LayoutDashboard, Settings, PawPrint, LogOut, Warehouse, UserCircle, FileText, Scissors, QrCode } from "lucide-react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 
@@ -31,6 +31,11 @@ const items = [
         title: "Inventori Ternak",
         url: "/livestock",
         icon: PawPrint,
+    },
+    {
+        title: "Scanner QR",
+        url: "/scan",
+        icon: QrCode,
     },
     {
         title: "Manajemen Pakan",

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { getEffectiveUserId } from "@/app/actions/users"
 
 export async function addHealthRecord(formData: FormData) {
     const supabase = await createClient()
@@ -20,6 +21,8 @@ export async function addHealthRecord(formData: FormData) {
         throw new Error("Semua field wajib harus diisi")
     }
 
+    const effectiveUserId = await getEffectiveUserId()
+
     // Insert health record
     const { error: insertError } = await supabase.from("health_records").insert({
         livestock_id,
@@ -30,7 +33,7 @@ export async function addHealthRecord(formData: FormData) {
         medicine_qty: medicine_qty || null,
         status,
         recorded_by: user.id,
-        user_id: user.id
+        user_id: effectiveUserId
     })
 
     if (insertError) {
@@ -43,7 +46,7 @@ export async function addHealthRecord(formData: FormData) {
             .from("inventory_items")
             .select("current_stock, name")
             .eq("id", item_used_id)
-            .eq("user_id", user.id)
+            .eq("user_id", effectiveUserId)
             .single()
 
         if (item) {
@@ -55,7 +58,7 @@ export async function addHealthRecord(formData: FormData) {
                 .from("inventory_items")
                 .update({ current_stock: newStock })
                 .eq("id", item_used_id)
-                .eq("user_id", user.id)
+                .eq("user_id", effectiveUserId)
         }
     }
 
@@ -79,7 +82,7 @@ export async function addHealthRecord(formData: FormData) {
             .from("livestocks")
             .update(updateData)
             .eq("id", livestock_id)
-            .eq("user_id", user.id)
+            .eq("user_id", effectiveUserId)
 
         // Sync cage occupancies if cage changed
         if (status === "karantina" && quarantine_cage_id && oldLivestock && oldLivestock.cage_id !== quarantine_cage_id) {
@@ -103,7 +106,7 @@ export async function addHealthRecord(formData: FormData) {
             .from("livestocks")
             .update({ status: "healthy" })
             .eq("id", livestock_id)
-            .eq("user_id", user.id)
+            .eq("user_id", effectiveUserId)
     }
 
     revalidatePath("/health")
@@ -118,11 +121,13 @@ export async function deleteHealthRecord(id: string) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error("Unauthorized")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     const { error, count } = await supabase
         .from("health_records")
         .delete({ count: 'exact' })
         .eq("id", id)
-        .eq("user_id", user.id)
+        .eq("user_id", effectiveUserId)
 
     if (error) {
         throw new Error(error.message)
@@ -159,6 +164,8 @@ export async function updateHealthRecord(id: string, formData: FormData) {
 
     if (!oldRecord) throw new Error("Rekam medis tidak ditemukan")
 
+    const effectiveUserId = await getEffectiveUserId()
+
     // Update health record
     const { error: updateError } = await supabase
         .from("health_records")
@@ -169,7 +176,7 @@ export async function updateHealthRecord(id: string, formData: FormData) {
             resolved_at: status === "selesai" ? (resolved_at || new Date().toISOString()) : null,
         })
         .eq("id", id)
-        .eq("user_id", user.id)
+        .eq("user_id", effectiveUserId)
 
     if (updateError) {
         throw new Error(updateError.message)
@@ -181,13 +188,13 @@ export async function updateHealthRecord(id: string, formData: FormData) {
             .from("livestocks")
             .update({ status: "healthy" })
             .eq("id", oldRecord.livestock_id)
-            .eq("user_id", user.id)
+            .eq("user_id", effectiveUserId)
     } else if (status === "karantina" || status === "pemulihan") {
         await supabase
             .from("livestocks")
             .update({ status: "sick" })
             .eq("id", oldRecord.livestock_id)
-            .eq("user_id", user.id)
+            .eq("user_id", effectiveUserId)
     }
 
     revalidatePath("/health")
