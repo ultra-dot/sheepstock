@@ -28,6 +28,14 @@ export function InventoryClient({
     const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false)
     const [editItem, setEditItem] = useState<any>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [searchQuery, setSearchQuery] = useState("")
+    const [filterCategory, setFilterCategory] = useState("")
+
+    const filteredItems = items.filter(item => {
+        const matchSearch = !searchQuery || item.name.toLowerCase().includes(searchQuery.toLowerCase()) || item.type.toLowerCase().includes(searchQuery.toLowerCase())
+        const matchCategory = !filterCategory || item.type.toLowerCase() === filterCategory.toLowerCase()
+        return matchSearch && matchCategory
+    })
 
     const handleStockInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -154,23 +162,18 @@ export function InventoryClient({
                 </div>
 
                 {/* Search & Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-6 relative group">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 bg-emerald-500/5 p-3 sm:p-4 rounded-2xl border border-emerald-500/10">
+                    <div className="relative flex-1 min-w-[180px] sm:min-w-[300px] group">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-emerald-500 transition-colors" />
-                        <input className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-emerald-500/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none text-sm shadow-sm" placeholder="Cari nama barang atau kategori..." type="text" />
+                        <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border border-emerald-500/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all outline-none text-sm font-medium shadow-sm" placeholder="Cari nama barang atau kategori..." type="text" />
                     </div>
-                    <div className="md:col-span-6 flex gap-4">
-                        <select className="w-full rounded-xl border border-emerald-500/10 bg-white dark:bg-slate-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm min-w-[140px] px-4 py-3 appearance-none shadow-sm cursor-pointer border-r-8 border-r-transparent">
-                            <option>Semua Kategori</option>
-                            <option>Pakan</option>
-                            <option>Obat</option>
-                            <option>Vaksin</option>
-                            <option>Peralatan</option>
-                        </select>
-                        <button className="px-4 rounded-xl border border-emerald-500/10 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-600 flex items-center justify-center shadow-sm transition-colors">
-                            <Filter className="w-5 h-5" />
-                        </button>
-                    </div>
+                    <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} className="px-6 py-3 bg-white dark:bg-slate-900 border border-emerald-500/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none text-sm font-medium shadow-sm appearance-none cursor-pointer border-r-8 border-r-transparent min-w-[160px]">
+                        <option value="">Semua Kategori</option>
+                        <option value="pakan">Pakan</option>
+                        <option value="obat">Obat</option>
+                        <option value="vaksin">Vaksin</option>
+                        <option value="peralatan">Peralatan</option>
+                    </select>
                 </div>
 
                 {/* Inventory Table */}
@@ -188,12 +191,12 @@ export function InventoryClient({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-emerald-500/5">
-                                {items.length === 0 ? (
+                                {filteredItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="text-center py-10 text-slate-500 font-medium">Gudang kosong.</td>
+                                        <td colSpan={6} className="text-center py-10 text-slate-500 font-medium">Gudang kosong atau tidak ada hasil pencarian.</td>
                                     </tr>
                                 ) : (
-                                    items.map((item) => {
+                                    filteredItems.map((item) => {
                                         const isLow = item.current_stock <= item.min_stock_alert;
                                         const isOut = item.current_stock === 0;
 
