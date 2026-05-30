@@ -53,6 +53,11 @@ const items = [
         icon: FileText,
     },
     {
+        title: "Pegawai",
+        url: "/settings/users",
+        icon: UserCircle,
+    },
+    {
         title: "Pengaturan",
         url: "/settings",
         icon: Settings,
@@ -63,6 +68,7 @@ export function AppSidebar() {
     const pathname = usePathname();
     const [userName, setUserName] = useState("Admin Peternakan");
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [userRole, setUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -70,9 +76,13 @@ export function AppSidebar() {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 // Priority: profile name (if not default) > metadata full_name > fallback
-                const { data: profile } = await supabase.from('profiles').select('name').eq('id', user.id).single();
-                if (profile?.name && profile.name !== "New Staff") {
-                    setUserName(profile.name);
+                const { data: profile } = await supabase.from('profiles').select('name, role').eq('id', user.id).single();
+                if (profile) {
+                    if (profile.role) setUserRole(profile.role);
+                    
+                    if (profile.name && profile.name !== "New Staff") {
+                        setUserName(profile.name);
+                    }
                 } else if (user.user_metadata?.full_name) {
                     setUserName(user.user_metadata.full_name);
                 }
@@ -118,6 +128,9 @@ export function AppSidebar() {
             <SidebarContent className="px-4 mt-2">
                 <nav className="flex-1 space-y-2">
                     {items.map((item) => {
+                        if (userRole === 'staff' && (item.url === '/reports' || item.url.startsWith('/settings'))) {
+                            return null;
+                        }
                         const isActive = pathname === item.url;
                         return (
                             <Link

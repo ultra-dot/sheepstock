@@ -54,6 +54,11 @@ export function LivestockClient({
     const [selectedDiagnosa, setSelectedDiagnosa] = useState("")
     const [activeHealthRecord, setActiveHealthRecord] = useState<any>(null)
 
+    // Dialog states
+    const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean, title: string, message: string, onConfirm: () => void} | null>(null)
+    const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+    const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+
     // Complex search & filter logic
     const filteredLivestocks = useMemo(() => {
         return livestocks.filter(animal => {
@@ -92,10 +97,10 @@ export function LivestockClient({
             setSelectedKeluhan("")
             setSelectedDiagnosa("")
             setActiveHealthRecord(null)
-            alert("Berhasil memperbarui data ternak!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Berhasil memperbarui data ternak!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal memperbarui data ternak")
+            setErrorDialog({ isOpen: true, title: "Gagal Memperbarui", message: error.message || "Gagal memperbarui data ternak" })
         } finally {
             setIsSubmitting(false)
         }
@@ -107,24 +112,34 @@ export function LivestockClient({
         try {
             await addLivestock(new FormData(e.currentTarget))
             setIsAddModalOpen(false)
-            alert("Berhasil menambahkan data ternak!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Berhasil menambahkan data ternak!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal menambahkan data ternak")
+            setErrorDialog({ isOpen: true, title: "Gagal Menambahkan", message: error.message || "Gagal menambahkan data ternak" })
         } finally {
             setIsSubmitting(false)
         }
     }
 
     const handleDeleteLivestock = (id: string, qrCode: string, cageId: string) => {
-        if (!confirm(`Yakin ingin menghapus data ternak dengan ID ${qrCode}?`)) return
-        startTransition(async () => {
-            try {
-                await deleteLivestock(id, cageId)
-                alert("Berhasil menghapus data ternak!")
-            } catch (error: any) {
-                console.error(error)
-                alert(error.message || "Gagal menghapus data ternak")
+        setConfirmDialog({
+            isOpen: true,
+            title: "Konfirmasi Penghapusan",
+            message: `Yakin ingin menghapus data ternak dengan ID ${qrCode}?\n\n⚠️ PERHATIAN: Aksi penghapusan ini akan dicatat dalam Audit Log sistem untuk tujuan akuntabilitas.`,
+            onConfirm: () => {
+                setConfirmDialog(null)
+                startTransition(async () => {
+                    try {
+                        await deleteLivestock(id, cageId)
+                    } catch (error: any) {
+                        console.error(error)
+                        setErrorDialog({
+                            isOpen: true,
+                            title: "Gagal Menghapus",
+                            message: error.message || "Gagal menghapus data ternak"
+                        })
+                    }
+                })
             }
         })
     }
@@ -784,6 +799,76 @@ export function LivestockClient({
                     </div>
                 )}
             </div>
+
+            {/* Confirm Dialog */}
+            {confirmDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{confirmDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line">{confirmDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
+                            <button onClick={() => setConfirmDialog(null)} className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                Batal
+                            </button>
+                            <button onClick={confirmDialog.onConfirm} className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm shadow-md transition-colors">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Dialog */}
+            {errorDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{errorDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{errorDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setErrorDialog(null)} className="w-full px-4 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Dialog */}
+            {successDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{successDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{successDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setSuccessDialog(null)} className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-colors shadow-md">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     )
 }

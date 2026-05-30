@@ -70,6 +70,11 @@ export function CagesClient({
     const [currentPage, setCurrentPage] = useState<number>(1)
     const ITEMS_PER_PAGE = 5
 
+    // Dialog states
+    const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean, title: string, message: string, onConfirm: () => void} | null>(null)
+    const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+    const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+
     const openMoveModal = (cageId: string) => {
         setMoveSourceCageId(cageId);
         setMoveTargetCageId("");
@@ -105,9 +110,10 @@ export function CagesClient({
         try {
             await createCage(new FormData(e.currentTarget))
             setIsAddModalOpen(false)
-        } catch (error) {
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Kandang berhasil ditambahkan!" })
+        } catch (error: any) {
             console.error(error)
-            alert("Gagal menambahkan kandang")
+            setErrorDialog({ isOpen: true, title: "Gagal Menambahkan", message: error.message || "Gagal menambahkan kandang" })
         } finally {
             setIsSubmitting(false)
         }
@@ -121,10 +127,10 @@ export function CagesClient({
             setFeedCageId(null)
             setSelectedFeedId("")
             setFeedQuantityInput("")
-            alert("Berhasil mencatat pemberian pakan!")
-        } catch (error) {
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Berhasil mencatat pemberian pakan!" })
+        } catch (error: any) {
             console.error(error)
-            alert("Gagal mencatat pemberian pakan")
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal mencatat pemberian pakan" })
         } finally {
             setIsSubmitting(false)
         }
@@ -134,9 +140,10 @@ export function CagesClient({
     const handleCleanStatus = async (cageId: string, isCleaned: boolean) => {
         try {
             await updateCageCleaningStatus(cageId, isCleaned);
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Status kebersihan kandang diperbarui!" })
         } catch (error: any) {
             console.error(error);
-            alert(error.message || "Gagal memperbarui status kebersihan");
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal memperbarui status kebersihan" });
         }
     }
 
@@ -148,9 +155,10 @@ export function CagesClient({
         try {
             await updateCage(editCageData.id, new FormData(e.currentTarget))
             setEditCageData(null)
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Kandang berhasil diperbarui!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal mengupdate kandang")
+            setErrorDialog({ isOpen: true, title: "Gagal Memperbarui", message: error.message || "Gagal mengupdate kandang" })
         } finally {
             setIsSubmitting(false)
         }
@@ -160,16 +168,31 @@ export function CagesClient({
     const handleDeleteCage = async (id: string) => {
         const cage = cagesWithStats.find(c => c.id === id);
         if (cage && cage.current_occupancy > 0) {
-            alert("Kandang masih berisi ternak. Silakan mutasi/pindahkan ternak terlebih dahulu sebelum menghapus kandang.");
+            setErrorDialog({
+                isOpen: true,
+                title: "Kandang Masih Terisi",
+                message: "Kandang masih berisi ternak. Silakan mutasi/pindahkan ternak terlebih dahulu sebelum menghapus kandang."
+            });
             return;
         }
 
-        if (!confirm(`Yakin ingin menghapus ${cage?.name || 'kandang ini'}? Data tidak bisa dikembalikan.`)) return
-        try {
-            await deleteCage(id)
-        } catch (e: any) {
-            alert(e.message || "Gagal menghapus kandang")
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: "Konfirmasi Penghapusan",
+            message: `Yakin ingin menghapus ${cage?.name || 'kandang ini'}? Data tidak bisa dikembalikan.\n\n⚠️ PERHATIAN: Aksi penghapusan ini akan dicatat dalam Audit Log sistem untuk tujuan akuntabilitas.`,
+            onConfirm: async () => {
+                setConfirmDialog(null)
+                try {
+                    await deleteCage(id)
+                } catch (e: any) {
+                    setErrorDialog({
+                        isOpen: true,
+                        title: "Gagal Menghapus",
+                        message: e.message || "Gagal menghapus kandang"
+                    });
+                }
+            }
+        });
     }
 
     // Handler for Moving Flock
@@ -199,7 +222,7 @@ export function CagesClient({
             });
             setQrSearch("");
         } else {
-            alert(`QR Code / ID ${code} tidak ditemukan di kandang asal ini.`);
+            setErrorDialog({ isOpen: true, title: "Ternak Tidak Ditemukan", message: `QR Code / ID ${code} tidak ditemukan di kandang asal ini.` });
             setQrSearch("");
         }
     };
@@ -225,7 +248,7 @@ export function CagesClient({
         if (!moveSourceCageId) return
 
         if (selectedLivestockIds.size === 0) {
-            alert("Pilih minimal 1 ternak untuk dipindahkan.");
+            setErrorDialog({ isOpen: true, title: "Pilih Ternak", message: "Pilih minimal 1 ternak untuk dipindahkan." });
             return;
         }
 
@@ -240,7 +263,7 @@ export function CagesClient({
         if (!targetCage) return;
 
         if (targetCage.current_occupancy + selectedLivestockIds.size > targetCage.capacity) {
-            alert("Kapasitas kandang tujuan tidak mencukupi untuk jumlah ternak yang dipilih.");
+            setErrorDialog({ isOpen: true, title: "Kapasitas Tidak Mencukupi", message: "Kapasitas kandang tujuan tidak mencukupi untuk jumlah ternak yang dipilih." });
             return;
         }
 
@@ -248,10 +271,10 @@ export function CagesClient({
         try {
             await moveLivestockBatch(moveTargetCageId, moveSourceCageId, Array.from(selectedLivestockIds))
             setMoveSourceCageId(null)
-            alert("Berhasil memindahkan ternak!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Berhasil memindahkan ternak!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal memindahkan ternak")
+            setErrorDialog({ isOpen: true, title: "Gagal Memindahkan", message: error.message || "Gagal memindahkan ternak" })
         } finally {
             setIsSubmitting(false)
         }
@@ -498,7 +521,7 @@ export function CagesClient({
                             <form onSubmit={(e) => {
                                 if (isInsufficient) {
                                     e.preventDefault();
-                                    alert("Stok pakan tidak mencukupi!");
+                                    setErrorDialog({ isOpen: true, title: "Stok Pakan", message: "Stok pakan tidak mencukupi!" });
                                     return;
                                 }
                                 handleFeed(e);
@@ -863,6 +886,74 @@ export function CagesClient({
                     handleScanId(id);
                 }}
             />
+
+            {/* Confirm Dialog */}
+            {confirmDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{confirmDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line">{confirmDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
+                            <button onClick={() => setConfirmDialog(null)} className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                Batal
+                            </button>
+                            <button onClick={confirmDialog.onConfirm} className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm shadow-md transition-colors">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Dialog */}
+            {errorDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{errorDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{errorDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setErrorDialog(null)} className="w-full px-4 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Success Dialog */}
+            {successDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{successDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{successDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setSuccessDialog(null)} className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-colors shadow-md">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

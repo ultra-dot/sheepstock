@@ -19,10 +19,12 @@ export default async function Dashboard() {
 
   const { data: { user } } = await supabase.auth.getUser();
   let userName = "Admin";
+  let userRole = "staff";
   let avatarUrl: string | null = null; // Remove hardcoded fallback
 
   if (user) {
-    const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
+    const { data: profile } = await supabase.from("profiles").select("name, role").eq("id", user.id).single();
+    if (profile?.role) userRole = profile.role;
     if (profile?.name && profile.name !== "New Staff") userName = profile.name;
     // Fallback to user_metadata in case profile still has the DB default
     else if (user.user_metadata?.full_name) userName = user.user_metadata.full_name;
@@ -159,9 +161,21 @@ export default async function Dashboard() {
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 bg-slate-50 dark:bg-slate-950">
         {/* Welcome Section */}
-        <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Hai, {userName}!</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">Berikut adalah ringkasan performa peternakan <span className="text-emerald-500 font-bold">MitraTani</span> hari ini.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Hai, {userName}!</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+              {userRole === 'admin' 
+                ? <><span className="text-purple-500 font-bold">Administrator</span> | Ringkasan operasional MitraTani hari ini.</>
+                : <><span className="text-emerald-500 font-bold">Staff Peternakan</span> | Jadwal dan status operasional hari ini.</>
+              }
+            </p>
+          </div>
+          {userRole === 'admin' && (
+            <div className="bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-4 py-2 rounded-xl text-sm font-bold border border-purple-200 dark:border-purple-800">
+              Akses Penuh
+            </div>
+          )}
         </div>
 
         {/* Stats Cards */}

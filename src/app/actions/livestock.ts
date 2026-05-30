@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { createAuditLog } from "@/lib/audit"
 
 export async function addLivestock(formData: FormData) {
     const supabase = await createClient()
@@ -38,6 +39,8 @@ export async function addLivestock(formData: FormData) {
     if (insertError) {
         throw new Error(insertError.message)
     }
+
+    await createAuditLog('CREATE', 'livestock', `Menambahkan domba baru dengan QR: ${qr_code}`, newLivestock.id, null, newLivestock)
 
     // Insert an initial weighing record for analytics
     await supabase.from("weighing_records").insert({
@@ -83,7 +86,10 @@ export async function updateLivestock(id: string, formData: FormData) {
     // Get old cage_id to check if it changed
     const { data: oldData } = await supabase.from("livestocks").select("cage_id, current_weight").eq("id", id).single()
 
-    const { error: updateError } = await supabase.from("livestocks").update({
+    // Get old full data
+    const { data: oldDataFull } = await supabase.from("livestocks").select("*").eq("id", id).single()
+
+    const { data: updatedData, error: updateError } = await supabase.from("livestocks").update({
         qr_code,
         type,
         gender,
@@ -91,11 +97,13 @@ export async function updateLivestock(id: string, formData: FormData) {
         current_weight,
         cage_id: new_cage_id,
         status,
-    }).eq("id", id)
+    }).eq("id", id).select().single()
 
     if (updateError) {
         throw new Error(updateError.message)
     }
+
+    await createAuditLog('UPDATE', 'livestock', `Memperbarui data domba dengan QR: ${qr_code}`, id, oldDataFull, updatedData)
 
     // Sync health records based on status
     if (status === 'sick') {
@@ -197,13 +205,18 @@ export async function deleteLivestock(id: string, cageId: string) {
     if (!user) throw new Error("Unauthorized")
 
     // Get current record to know which cage it belongs to if cageId isn't passed reliably
-    const { data: livestock } = await supabase.from("livestocks").select("cage_id").eq("id", id).single()
+    const { data: livestock } = await supabase.from("livestocks").select("*").eq("id", id).single()
 
     const { error } = await supabase.from("livestocks").delete().eq("id", id).eq("user_id", user.id)
 
     if (error) {
+        if (error.code === '23503' || error.message.includes('foreign key constraint')) {
+            throw new Error("Gagal menghapus: Data ternak ini tidak dapat dihapus karena sudah memiliki riwayat panen, penjualan, atau data terkait lainnya.");
+        }
         throw new Error(error.message)
     }
+
+    await createAuditLog('DELETE', 'livestock', `Menghapus data domba dengan QR: ${livestock?.qr_code || 'Tidak diketahui'}`, id, livestock, null)
 
     // Update cage occupancy
     const targetCageId = livestock?.cage_id || cageId

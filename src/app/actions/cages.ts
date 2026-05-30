@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
+import { createAuditLog } from "@/lib/audit"
 
 export async function createCage(formData: FormData) {
     const supabase = await createClient()
@@ -16,18 +17,20 @@ export async function createCage(formData: FormData) {
     const rawTemp = formData.get("temperature") as string | null
     const temperature = rawTemp ? (parseFloat(rawTemp.replace(',', '.')) || 30.5) : 30.5
 
-    const { error } = await supabase.from("cages").insert({
+    const { data: newCage, error } = await supabase.from("cages").insert({
         name,
         capacity,
         current_occupancy: 0,
         status,
         temperature,
         user_id: user.id
-    })
+    }).select().single()
 
     if (error) {
         throw new Error(error.message)
     }
+
+    await createAuditLog('CREATE', 'cages', `Membuat kandang baru: ${name}`, newCage.id, null, newCage)
 
     revalidatePath("/cages")
 }
@@ -39,7 +42,7 @@ export async function deleteCage(id: string) {
     if (!user) throw new Error("Unauthorized")
 
     // Check if occupied
-    const { data: cage } = await supabase.from("cages").select("current_occupancy").eq("id", id).single()
+    const { data: cage } = await supabase.from("cages").select("*").eq("id", id).single()
     if (cage && cage.current_occupancy > 0) {
         throw new Error("Kandang masih berisi ternak. Silakan pindahkan terlebih dahulu.")
     }
@@ -49,6 +52,8 @@ export async function deleteCage(id: string) {
     if (error) {
         throw new Error(error.message)
     }
+
+    await createAuditLog('DELETE', 'cages', `Menghapus kandang: ${cage?.name || id}`, id, cage, null)
 
     revalidatePath("/cages")
 }
@@ -64,16 +69,20 @@ export async function updateCage(id: string, formData: FormData) {
     const rawTemp = formData.get("temperature") as string | null
     const temperature = rawTemp ? (parseFloat(rawTemp.replace(',', '.')) || 30.5) : 30.5
 
-    const { error } = await supabase.from("cages").update({
+    const { data: oldCage } = await supabase.from("cages").select("*").eq("id", id).single()
+
+    const { data: updatedCage, error } = await supabase.from("cages").update({
         name,
         capacity,
         status,
         temperature
-    }).eq("id", id)
+    }).eq("id", id).select().single()
 
     if (error) {
         throw new Error(error.message)
     }
+
+    await createAuditLog('UPDATE', 'cages', `Memperbarui data kandang: ${name}`, id, oldCage, updatedCage)
 
     revalidatePath("/cages")
 }
@@ -119,6 +128,8 @@ export async function moveLivestockBatch(targetCageId: string, sourceCageId: str
 
     await updateCageOccupancy(sourceCageId);
     await updateCageOccupancy(targetCageId);
+
+    await createAuditLog('UPDATE', 'cages_move', `Memindahkan ${livestockIds.length} ekor domba dari kandang ${sourceCageId} ke ${targetCageId}`, undefined, null, null)
 
     revalidatePath("/cages")
     revalidatePath("/livestock")

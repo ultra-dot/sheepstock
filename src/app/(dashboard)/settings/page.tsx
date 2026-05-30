@@ -22,6 +22,10 @@ export default function SettingsPage() {
 
     const [isUploading, setIsUploading] = useState(false);
 
+    // Dialog states
+    const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null);
+    const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null);
+
     useEffect(() => {
         const fetchUser = async () => {
             const supabase = createClient();
@@ -79,9 +83,10 @@ export default function SettingsPage() {
 
             setUserName(editName);
             setIsEditingProfile(false);
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Profil berhasil disimpan!" });
         } catch (error) {
             console.error('Error saving profile:', error);
-            alert('Gagal menyimpan profil.');
+            setErrorDialog({ isOpen: true, title: "Gagal Menyimpan", message: 'Gagal menyimpan profil.' });
         } finally {
             setIsSavingProfile(false);
         }
@@ -123,9 +128,10 @@ export default function SettingsPage() {
             if (updateError) throw updateError;
 
             setAvatarUrl(publicUrl);
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Foto profil berhasil diperbarui!" });
         } catch (error) {
             console.error('Error uploading avatar:', error);
-            alert('Gagal mengunggah foto. Pastikan ukuran file < 1MB dan Anda sudah memasang bucket storage.');
+            setErrorDialog({ isOpen: true, title: "Gagal Mengunggah", message: 'Gagal mengunggah foto. Pastikan ukuran file < 1MB dan Anda sudah memasang bucket storage.' });
         } finally {
             setIsUploading(false);
         }
@@ -287,6 +293,41 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
+                        {/* Admin Only: Audit Logs */}
+                        {userRole === 'Administrator' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-blue-500/20 rounded-3xl p-4 sm:p-6 glass-card flex flex-col justify-between gap-4 h-full">
+                                    <div>
+                                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Log Aktivitas Sistem</h3>
+                                        <p className="text-sm text-slate-500 mt-1">Pantau semua perubahan data yang dilakukan oleh tim Anda.</p>
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                        <a
+                                            href="/settings/audit-logs"
+                                            className="px-6 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-colors inline-flex items-center gap-2"
+                                        >
+                                            Lihat Log
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-purple-500/20 rounded-3xl p-4 sm:p-6 glass-card flex flex-col justify-between gap-4 h-full">
+                                    <div>
+                                        <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Manajemen Pegawai</h3>
+                                        <p className="text-sm text-slate-500 mt-1">Kelola hak akses dan peran (role) dari akun staff Anda.</p>
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                        <a
+                                            href="/settings/users"
+                                            className="px-6 py-2.5 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-600 dark:text-purple-400 font-bold rounded-xl transition-colors inline-flex items-center gap-2"
+                                        >
+                                            Kelola Pegawai
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Standard Logout */}
                         <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-6 glass-card flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                             <div>
@@ -308,6 +349,50 @@ export default function SettingsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Error Dialog */}
+            {errorDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{errorDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{errorDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setErrorDialog(null)} className="w-full px-4 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Dialog */}
+            {successDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{successDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{successDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setSuccessDialog(null)} className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-colors shadow-md">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

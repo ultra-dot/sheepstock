@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/audit";
 
 export async function processHarvest(formData: FormData) {
     const supabase = await createClient();
@@ -143,6 +144,16 @@ export async function processHarvest(formData: FormData) {
             }
         }
     }
+
+    // 4. Record Audit Log for the batch
+    await createAuditLog(
+        'CREATE', 
+        'harvest', 
+        `Memproses ${harvestType} untuk ${livestockData.length} ekor domba kepada pembeli: ${customerName}`,
+        undefined,
+        null,
+        livestockData
+    );
 
     // Revalidate paths to reflect updates instantly
     revalidatePath('/harvest');

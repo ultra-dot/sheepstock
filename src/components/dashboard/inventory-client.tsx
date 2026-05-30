@@ -29,6 +29,11 @@ export function InventoryClient({
     const [editItem, setEditItem] = useState<any>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
+    // Dialog states
+    const [confirmDialog, setConfirmDialog] = useState<{isOpen: boolean, title: string, message: string, onConfirm: () => void} | null>(null)
+    const [errorDialog, setErrorDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+    const [successDialog, setSuccessDialog] = useState<{isOpen: boolean, title: string, message: string} | null>(null)
+
     const handleStockInSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsSubmitting(true)
@@ -38,10 +43,10 @@ export function InventoryClient({
         try {
             await updateStock(itemId, quantity, 'in')
             setIsStockInModalOpen(false)
-            alert("Stok berhasil ditambahkan!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Stok berhasil ditambahkan!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal menambahkan stok")
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal menambahkan stok" })
         } finally {
             setIsSubmitting(false)
         }
@@ -56,10 +61,10 @@ export function InventoryClient({
         try {
             await updateStock(itemId, quantity, 'out')
             setIsStockOutModalOpen(false)
-            alert("Stok berhasil dikurangi!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Stok berhasil dikurangi!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal mengurangi stok")
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal mengurangi stok" })
         } finally {
             setIsSubmitting(false)
         }
@@ -71,10 +76,10 @@ export function InventoryClient({
         try {
             await addInventoryItem(new FormData(e.currentTarget))
             setIsAddItemModalOpen(false)
-            alert("Barang baru berhasil ditambahkan!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Barang baru berhasil ditambahkan!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal menambahkan barang")
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal menambahkan barang" })
         } finally {
             setIsSubmitting(false)
         }
@@ -87,24 +92,31 @@ export function InventoryClient({
         try {
             await updateInventoryItem(editItem.id, new FormData(e.currentTarget))
             setEditItem(null)
-            alert("Barang berhasil diperbarui!")
+            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Barang berhasil diperbarui!" })
         } catch (error: any) {
             console.error(error)
-            alert(error.message || "Gagal memperbarui barang")
+            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal memperbarui barang" })
         } finally {
             setIsSubmitting(false)
         }
     }
 
     const handleDeleteItem = async (itemId: string, itemName: string) => {
-        if (!confirm(`Hapus "${itemName}" dari inventori?`)) return
-        try {
-            await deleteInventoryItem(itemId)
-            alert("Barang berhasil dihapus!")
-        } catch (error: any) {
-            console.error(error)
-            alert(error.message || "Gagal menghapus barang")
-        }
+        setConfirmDialog({
+            isOpen: true,
+            title: "Konfirmasi Hapus",
+            message: `Hapus "${itemName}" dari inventori?\n\n⚠️ PERHATIAN: Aksi penghapusan ini akan dicatat dalam Audit Log sistem untuk tujuan akuntabilitas.`,
+            onConfirm: async () => {
+                setConfirmDialog(null)
+                try {
+                    await deleteInventoryItem(itemId)
+                    setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Barang berhasil dihapus!" })
+                } catch (error: any) {
+                    console.error(error)
+                    setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal menghapus barang" })
+                }
+            }
+        })
     }
 
     return (
@@ -455,6 +467,75 @@ export function InventoryClient({
                                 <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 transition-all disabled:opacity-50 cursor-pointer">{isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Confirm Dialog */}
+            {confirmDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{confirmDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line">{confirmDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex gap-3">
+                            <button onClick={() => setConfirmDialog(null)} className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                                Batal
+                            </button>
+                            <button onClick={confirmDialog.onConfirm} className="flex-1 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm shadow-md transition-colors">
+                                Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Dialog */}
+            {errorDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{errorDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{errorDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setErrorDialog(null)} className="w-full px-4 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm transition-colors">
+                                Mengerti
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Dialog */}
+            {successDialog?.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                        <div className="p-6">
+                            <div className="flex justify-center mb-4">
+                                <div className="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 p-3 rounded-full">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-center mb-2 text-slate-800 dark:text-slate-100">{successDialog.title}</h3>
+                            <p className="text-sm text-slate-500 text-center whitespace-pre-line leading-relaxed">{successDialog.message}</p>
+                        </div>
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 flex justify-center">
+                            <button onClick={() => setSuccessDialog(null)} className="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-colors shadow-md">
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
