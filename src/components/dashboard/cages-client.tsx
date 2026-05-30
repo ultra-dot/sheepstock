@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react"
 import { Search, PlusCircle, MoreVertical, Plus, Grid2x2, Edit2, Trash2, ArrowRightLeft, Wheat, Users } from "lucide-react"
-import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch, updateCageCleaningStatus } from "@/app/actions/cages"
+import { createCage, feedCage, updateCage, deleteCage, moveLivestockBatch } from "@/app/actions/cages"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { QrCode } from "lucide-react"
 import dynamic from "next/dynamic"
@@ -22,7 +22,7 @@ export type CageWithStats = {
     status: string
     temperature: number
     last_cleaned_at: string
-    stats: { maleCount: number, femaleCount: number }
+    stats: { maleCount: number, femaleCount: number, fcr?: number, fcrStatus?: string }
     occupants: any[]
     capacityPercentage: number
     ui: { statusDot: string, statusText: string, statusLabel: string, progressColor: string, progressBg: string, fedToday: boolean }
@@ -58,7 +58,6 @@ export function CagesClient({
     const [detailCage, setDetailCage] = useState<CageWithStats | null>(null)
 
     const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
-    const [cleanMenuOpenId, setCleanMenuOpenId] = useState<string | null>(null)
     const [editCageData, setEditCageData] = useState<CageWithStats | null>(null)
 
     // Move Flock Additions
@@ -92,10 +91,10 @@ export function CagesClient({
 
     // Close dropdown menu if clicking outside (simple approach: close on any click outside the menu button)
     useEffect(() => {
-        const handleClickOutside = () => { setMenuOpenId(null); setCleanMenuOpenId(null); }
-        if (menuOpenId || cleanMenuOpenId) document.addEventListener("click", handleClickOutside)
+        const handleClickOutside = () => { setMenuOpenId(null); }
+        if (menuOpenId) document.addEventListener("click", handleClickOutside)
         return () => document.removeEventListener("click", handleClickOutside)
-    }, [menuOpenId, cleanMenuOpenId])
+    }, [menuOpenId])
 
     // Form states
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -139,17 +138,6 @@ export function CagesClient({
             setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal mencatat pemberian pakan" })
         } finally {
             setIsSubmitting(false)
-        }
-    }
-
-    // Handler for Clean Status
-    const handleCleanStatus = async (cageId: string, isCleaned: boolean) => {
-        try {
-            await updateCageCleaningStatus(cageId, isCleaned);
-            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Status kebersihan kandang diperbarui!" })
-        } catch (error: any) {
-            console.error(error);
-            setErrorDialog({ isOpen: true, title: "Gagal", message: error.message || "Gagal memperbarui status kebersihan" });
         }
     }
 
@@ -418,28 +406,19 @@ export function CagesClient({
                                                 <p className="text-[10px] uppercase font-bold text-slate-400">Suhu</p>
                                                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">{cage.temperature || '--'}°C</p>
                                             </div>
-                                            <div className="relative bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10 flex flex-col justify-between">
-                                                <p className="text-[10px] uppercase font-bold text-slate-400 mb-1">Kebersihan</p>
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(cleanMenuOpenId === cage.id ? null : cage.id) }}
-                                                    className="flex items-center justify-between w-full mt-auto bg-white dark:bg-slate-800 border border-emerald-500/20 py-1.5 px-2 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors"
-                                                >
-                                                    <span className={`flex items-center gap-1.5 ${!cage.last_cleaned_at ? 'text-rose-600' : 'text-emerald-600'}`}>
-                                                        <span className={`w-2 h-2 rounded-full ${!cage.last_cleaned_at ? 'bg-rose-500' : 'bg-emerald-500'}`}></span>
-                                                        {!cage.last_cleaned_at ? 'Kotor' : 'Bersih'}
-                                                    </span>
-                                                    <span className="text-[10px] text-slate-400">▼</span>
-                                                </button>
-                                                {cleanMenuOpenId === cage.id && (
-                                                    <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 py-1 z-20 overflow-hidden">
-                                                        <button onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(null); handleCleanStatus(cage.id, true) }} className="w-full text-left px-3 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 flex items-center gap-2">
-                                                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span> Bersih
-                                                        </button>
-                                                        <button onClick={(e) => { e.stopPropagation(); setCleanMenuOpenId(null); handleCleanStatus(cage.id, false) }} className="w-full text-left px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2">
-                                                            <span className="w-2 h-2 rounded-full bg-rose-500"></span> Kotor
-                                                        </button>
-                                                    </div>
-                                                )}
+                                            <div className="bg-emerald-500/5 p-3 rounded-xl border border-emerald-500/10 flex flex-col justify-between">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <p className="text-[10px] uppercase font-bold text-slate-400">FCR 30Hr</p>
+                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                                                        cage.stats.fcrStatus === 'Sangat Efisien' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                        cage.stats.fcrStatus === 'Normal' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                                        cage.stats.fcrStatus === 'Kurang Efisien' ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400' :
+                                                        'bg-slate-100 text-slate-500 dark:bg-slate-800'
+                                                    }`}>{cage.stats.fcrStatus || '--'}</span>
+                                                </div>
+                                                <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                                                    {(cage.stats.fcr ?? 0) > 0 ? cage.stats.fcr : '--'}
+                                                </p>
                                             </div>
                                             <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
                                                 <p className="text-[10px] uppercase font-bold text-slate-400">Jantan</p>

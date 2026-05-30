@@ -366,3 +366,42 @@ export async function importLivestocksBatch(livestocksData: any[]) {
     revalidatePath("/cages")
     revalidatePath("/dashboard")
 }
+
+export async function weighLivestock(id: string, weight: number) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error("Unauthorized")
+
+    const effectiveUserId = await getEffectiveUserId()
+
+    const { data: oldData } = await supabase.from("livestocks").select("current_weight").eq("id", id).single()
+    if (!oldData) throw new Error("Ternak tidak ditemukan")
+
+    if (oldData.current_weight === weight) {
+        throw new Error("Berat ternak masih sama, tidak ada perubahan.")
+    }
+
+    // Update livestock
+    const { error: updateError } = await supabase.from("livestocks").update({
+        current_weight: weight,
+        updated_at: new Date().toISOString()
+    }).eq("id", id)
+
+    if (updateError) {
+        throw new Error(updateError.message)
+    }
+
+    // Insert weighing record
+    await supabase.from("weighing_records").insert({
+        livestock_id: id,
+        weight: weight,
+        scanned_by: user.id,
+        user_id: effectiveUserId
+    })
+
+    await createAuditLog('UPDATE', 'weighing_records', `Pembaruan berat ternak (ID: ${id}) menjadi ${weight} Kg via Fast Scan`, undefined, null, null)
+
+    revalidatePath("/livestock")
+    revalidatePath("/cages")
+    revalidatePath("/dashboard")
+}

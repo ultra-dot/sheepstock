@@ -39,12 +39,62 @@ export default async function CagesPage() {
 
     if (!cages) return <div className="p-6">Gagal memuat data kandang.</div>
 
+    // Fetch feeding records for the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysStr = thirtyDaysAgo.toISOString();
+    
+    const { data: monthFeedingRecords } = await supabase
+        .from("feeding_records")
+        .select("cage_id, quantity_given")
+        .gte("recorded_at", thirtyDaysStr)
+
+    // Fetch weighing records for the last 30 days
+    const { data: monthWeighingRecords } = await supabase
+        .from("weighing_records")
+        .select("livestock_id, weight, recorded_at")
+        .gte("recorded_at", thirtyDaysStr)
+        .order('recorded_at', { ascending: true })
+
     // Calculate stats for each cage
     const cagesWithStats = cages.map(cage => {
         const occupants = livestocks?.filter(l => l.cage_id === cage.id) || []
         
         // Check if cage was fed today
         const fedToday = feedingRecords?.some(r => r.cage_id === cage.id) || false;
+
+        // FCR Calculation (30 Days)
+        const cageFeeds = monthFeedingRecords?.filter(r => r.cage_id === cage.id) || [];
+        const totalFeed = cageFeeds.reduce((sum, r) => sum + r.quantity_given, 0);
+
+        let totalGain = 0;
+        occupants.forEach(livestock => {
+            const weights = monthWeighingRecords?.filter(w => w.livestock_id === livestock.id) || [];
+            if (weights.length >= 2) {
+                const firstWeight = weights[0].weight;
+                const lastWeight = weights[weights.length - 1].weight;
+                totalGain += (lastWeight - firstWeight);
+            } else if (weights.length === 1 && livestock.initial_weight) {
+                // If only 1 record, compare with initial weight if entry date is within 30 days
+                const entryDate = new Date(livestock.entry_date);
+                if (entryDate >= thirtyDaysAgo) {
+                    totalGain += (weights[0].weight - livestock.initial_weight);
+                }
+            } else if (livestock.current_weight > livestock.initial_weight) {
+                // Fallback for simplicity if entered within 30 days
+                const entryDate = new Date(livestock.entry_date);
+                if (entryDate >= thirtyDaysAgo) {
+                    totalGain += (livestock.current_weight - livestock.initial_weight);
+                }
+            }
+        });
+
+        // Avoid negative or 0 gain dividing issues
+        const fcr = totalGain > 0 && totalFeed > 0 ? Number((totalFeed / totalGain).toFixed(2)) : 0;
+        let fcrStatus = "Belum Cukup Data";
+        if (fcr > 0 && fcr < 7) fcrStatus = "Sangat Efisien";
+        else if (fcr >= 7 && fcr <= 9) fcrStatus = "Normal";
+        else if (fcr > 9) fcrStatus = "Kurang Efisien";
 
         const maleCount = occupants.filter(l => l.gender === 'male').length
         const femaleCount = occupants.filter(l => l.gender === 'female').length
@@ -76,7 +126,7 @@ export default async function CagesPage() {
 
         return {
             ...cage,
-            stats: { maleCount, femaleCount },
+            stats: { maleCount, femaleCount, fcr, fcrStatus },
             occupants,
             capacityPercentage: Math.min(capacityPercentage, 100),
             ui: { statusDot, statusText, statusLabel, progressColor, progressBg, fedToday }

@@ -6,7 +6,7 @@ import { Scanner, IDetectedBarcode } from '@yudiel/react-qr-scanner';
 import { Camera, AlertCircle, RefreshCcw, ArrowLeft, Edit2, Eye, ScanLine, Search, Activity, X, Check, Warehouse } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { createClient } from '@/lib/supabase/client';
-import { updateLivestock, getLivestockHistory } from '@/app/actions/livestock';
+import { updateLivestock, getLivestockHistory, weighLivestock } from '@/app/actions/livestock';
 
 type ViewMode = 'scanner' | 'result' | 'detail' | 'edit' | 'mutasi';
 
@@ -25,6 +25,10 @@ export default function ScanPage() {
     const [history, setHistory] = useState<{ healthRecords: any[], weighingRecords: any[] } | null>(null);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
     const [detailTab, setDetailTab] = useState<'info' | 'health'>('info');
+
+    // Timbang state
+    const [isTimbangOpen, setIsTimbangOpen] = useState(false);
+    const [timbangWeight, setTimbangWeight] = useState("");
 
     // Edit & Mutasi state
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -227,12 +231,65 @@ export default function ScanPage() {
                                     </div>
                                 ))}
                             </div>
-                            <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                                <button onClick={openEdit} className="flex items-center justify-center gap-2 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-blue-500/20"><Edit2 className="w-4 h-4" /> Edit Data</button>
-                                <button onClick={openDetail} className="flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl font-bold text-sm transition-colors"><Eye className="w-4 h-4" /> Profil Lengkap</button>
+                            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+                                <button onClick={() => setIsTimbangOpen(true)} className="flex items-center justify-center gap-1.5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-[11px] transition-colors shadow-lg shadow-amber-500/20"><Activity className="w-3.5 h-3.5" /> Timbang</button>
+                                <button onClick={openEdit} className="flex items-center justify-center gap-1.5 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-[11px] transition-colors shadow-lg shadow-blue-500/20"><Edit2 className="w-3.5 h-3.5" /> Edit Data</button>
+                                <button onClick={openDetail} className="flex items-center justify-center gap-1.5 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl font-bold text-[11px] transition-colors"><Eye className="w-3.5 h-3.5" /> Profil Lengkap</button>
                             </div>
                             <button onClick={openMutasi} className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-emerald-500/20"><Warehouse className="w-4 h-4" /> Mutasi Kandang</button>
                             <button onClick={handleReset} className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700"><RefreshCcw className="w-4 h-4" /> Scan Ternak Lain</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* TIMBANG MODAL */}
+                {isTimbangOpen && scannedData && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 w-full max-w-sm overflow-hidden flex flex-col">
+                            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">Update Berat Badan</h3>
+                                <button onClick={() => setIsTimbangOpen(false)} className="p-1.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full hover:bg-slate-200"><X className="w-4 h-4" /></button>
+                            </div>
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                setIsSubmitting(true);
+                                try {
+                                    const w = parseFloat(timbangWeight);
+                                    if(isNaN(w) || w <= 0) throw new Error("Berat tidak valid");
+                                    await weighLivestock(scannedData.id, w);
+                                    
+                                    // Update local state
+                                    setScannedData({...scannedData, current_weight: w});
+                                    setSuccessMsg("Berat ternak berhasil diupdate!");
+                                    setIsTimbangOpen(false);
+                                    setTimbangWeight("");
+                                    setTimeout(() => setSuccessMsg(null), 3000);
+                                } catch (error: any) {
+                                    setErrorMsg(error.message);
+                                } finally {
+                                    setIsSubmitting(false);
+                                }
+                            }} className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Berat Baru (Kg)</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        min="0.1"
+                                        required 
+                                        value={timbangWeight}
+                                        onChange={(e) => setTimbangWeight(e.target.value)}
+                                        placeholder={`Berat saat ini: ${scannedData.current_weight} kg`}
+                                        className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" 
+                                    />
+                                </div>
+                                <div className="pt-2 flex gap-3">
+                                    <button type="button" onClick={() => setIsTimbangOpen(false)} className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-sm">Batal</button>
+                                    <button type="submit" disabled={isSubmitting} className="flex-1 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-amber-500/20 disabled:opacity-50">
+                                        {isSubmitting ? 'Menyimpan...' : 'Simpan'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
