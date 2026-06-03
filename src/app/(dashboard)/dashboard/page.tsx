@@ -11,6 +11,7 @@ import { PopulationChart } from "@/components/dashboard/population-chart";
 import { PopulationDropdown } from "@/components/dashboard/population-dropdown";
 import { UserDropdown } from "@/components/dashboard/user-dropdown";
 import { NotificationDropdown } from "@/components/dashboard/notification-dropdown";
+import { HelpDropdown } from "@/components/dashboard/help-dropdown";
 import { GrowthChart } from "@/components/dashboard/growth-chart";
 import { HarvestChart } from "@/components/dashboard/harvest-chart";
 import { IllnessChart } from "@/components/dashboard/illness-chart";
@@ -32,7 +33,7 @@ export default async function Dashboard() {
     if (profile?.name && profile.name !== "New Staff") userName = profile.name;
     // Fallback to user_metadata in case profile still has the DB default
     else if (user.user_metadata?.full_name) userName = user.user_metadata.full_name;
-    
+
     if (user.user_metadata?.avatar_url) avatarUrl = user.user_metadata.avatar_url;
   }
 
@@ -261,9 +262,7 @@ export default async function Dashboard() {
         </div>
         <div className="flex items-center gap-2 sm:gap-4 shrink-0">
           <NotificationDropdown notifications={notifications} userRole={userRole} />
-          <button className="hidden sm:flex w-10 h-10 items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
-            <HelpCircle className="w-5 h-5" />
-          </button>
+          <HelpDropdown />
           <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-2 hidden sm:block"></div>
           <UserDropdown userName={userName} avatarUrl={avatarUrl} showName={true} userRole={userRole} />
         </div>

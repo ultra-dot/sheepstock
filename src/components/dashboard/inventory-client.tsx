@@ -134,7 +134,7 @@ export function InventoryClient({
                 <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <SidebarTrigger />
                     <div className="flex items-center gap-2 sm:gap-3 ml-0 sm:ml-2 min-w-0">
-                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Manajemen Pakan</h2>
+                        <h2 className="text-base sm:text-xl font-bold tracking-tight truncate">Gudang</h2>
                     </div>
                 </div>
                 <div className="flex gap-2 sm:gap-3 items-center shrink-0">
@@ -156,7 +156,7 @@ export function InventoryClient({
 
             <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
                         <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Total Item</p>
                         <p className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">{totalItems} <span className="text-sm font-normal text-emerald-600 ml-1">Jenis</span></p>
@@ -165,11 +165,6 @@ export function InventoryClient({
                     <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/10">
                         <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Barang Menipis</p>
                         <p className="text-2xl font-black text-amber-600 leading-none">{lowStockItems} <span className="text-sm font-normal text-amber-600 ml-1">SKU</span></p>
-                    </div>
-
-                    <div className="p-4 bg-emerald-500/5 rounded-xl border border-emerald-500/10">
-                        <p className="text-[10px] uppercase font-bold text-slate-500 mb-1">Total Estimasi Aset</p>
-                        <p className="text-2xl font-black text-emerald-600 leading-none">{totalEstValue}</p>
                     </div>
                 </div>
 

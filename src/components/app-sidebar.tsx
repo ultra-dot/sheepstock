@@ -38,7 +38,7 @@ const items = [
         icon: QrCode,
     },
     {
-        title: "Manajemen Pakan",
+        title: "Gudang",
         url: "/inventory",
         icon: Box,
     },

@@ -31,8 +31,10 @@ export function HarvestClient({
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
     
     // Potong Criteria State
-    const [minWeightCriteria, setMinWeightCriteria] = useState<number>(25)
-    const [tempMinWeight, setTempMinWeight] = useState<string>("25")
+    const [minWeightDomba, setMinWeightDomba] = useState<number>(30)
+    const [minWeightKambing, setMinWeightKambing] = useState<number>(20)
+    const [tempMinWeightDomba, setTempMinWeightDomba] = useState<string>("30")
+    const [tempMinWeightKambing, setTempMinWeightKambing] = useState<string>("20")
 
     // Multi-select state
     const [selectedForSale, setSelectedForSale] = useState<string[]>([])
@@ -80,29 +82,42 @@ export function HarvestClient({
 
     // Load criteria from localStorage on mount
     useEffect(() => {
-        const saved = localStorage.getItem('sheepstock_min_harvest_weight');
-        if (saved && !isNaN(Number(saved))) {
-            setMinWeightCriteria(Number(saved));
-            setTempMinWeight(saved);
+        const savedDomba = localStorage.getItem('sheepstock_min_harvest_weight_domba');
+        const savedKambing = localStorage.getItem('sheepstock_min_harvest_weight_kambing');
+        
+        if (savedDomba && !isNaN(Number(savedDomba))) {
+            setMinWeightDomba(Number(savedDomba));
+            setTempMinWeightDomba(savedDomba);
+        }
+        if (savedKambing && !isNaN(Number(savedKambing))) {
+            setMinWeightKambing(Number(savedKambing));
+            setTempMinWeightKambing(savedKambing);
         }
     }, [])
 
     const handleSaveCriteria = () => {
-        const num = parseFloat(tempMinWeight);
-        if (!isNaN(num) && num > 0) {
-            setMinWeightCriteria(num);
-            localStorage.setItem('sheepstock_min_harvest_weight', num.toString());
+        const numDomba = parseFloat(tempMinWeightDomba);
+        const numKambing = parseFloat(tempMinWeightKambing);
+        
+        if (!isNaN(numDomba) && numDomba > 0 && !isNaN(numKambing) && numKambing > 0) {
+            setMinWeightDomba(numDomba);
+            setMinWeightKambing(numKambing);
+            localStorage.setItem('sheepstock_min_harvest_weight_domba', numDomba.toString());
+            localStorage.setItem('sheepstock_min_harvest_weight_kambing', numKambing.toString());
             setIsSettingsModalOpen(false);
             setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Kriteria berat minimum berhasil disimpan!" });
         } else {
-            setErrorDialog({ isOpen: true, title: "Input Tidak Valid", message: "Masukkan angka yang valid!" });
+            setErrorDialog({ isOpen: true, title: "Input Tidak Valid", message: "Masukkan angka yang valid untuk kedua tipe!" });
         }
     }
 
     // Compute ready to harvest strictly based on dynamic criteria
     const readyToHarvest = useMemo(() => {
-        return allActiveLivestock.filter(l => l.status === 'healthy' && l.current_weight >= minWeightCriteria);
-    }, [allActiveLivestock, minWeightCriteria])
+        return allActiveLivestock.filter(l => {
+            if (l.status !== 'healthy') return false;
+            return l.type === 'domba' ? l.current_weight >= minWeightDomba : l.current_weight >= minWeightKambing;
+        });
+    }, [allActiveLivestock, minWeightDomba, minWeightKambing])
 
     // Price thousand separator dot formatting helper
     const formatThousand = (val: string) => {
@@ -356,7 +371,7 @@ export function HarvestClient({
                             <h3 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 mt-1">
                                 {totalReady} <span className="text-xs sm:text-sm font-medium text-slate-400">Ekor</span>
                             </h3>
-                            {totalReady > 0 && <p className="text-[10px] sm:text-xs text-emerald-600 font-bold mt-1 truncate">Sehat &amp; bobot ≥ {minWeightCriteria}kg</p>}
+                            {totalReady > 0 && <p className="text-[10px] sm:text-xs text-emerald-600 font-bold mt-1 truncate">Sehat &amp; bobot ≥ {minWeightDomba}kg (Domba) / {minWeightKambing}kg (Kambing)</p>}
                         </div>
                     </div>
                     <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl border border-indigo-500/10 flex items-center gap-3 sm:gap-5 shadow-sm hover:border-indigo-500/30 transition-colors">
@@ -457,7 +472,7 @@ export function HarvestClient({
                         <div className="space-y-4">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-2">
                                 <h3 className="text-[11px] sm:text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                                    <Scissors className="w-4 h-4 text-emerald-500 shrink-0"/> <span className="truncate">Siap Potong (Sehat &amp; ≥ {minWeightCriteria}kg)</span>
+                                    <Scissors className="w-4 h-4 text-emerald-500 shrink-0"/> <span className="truncate">Siap Potong (Sehat &amp; ≥ {minWeightDomba}kg Domba / {minWeightKambing}kg Kambing)</span>
                                 </h3>
                                 <button onClick={() => setIsSettingsModalOpen(true)} className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-slate-500 hover:text-emerald-600 transition-colors bg-white dark:bg-slate-900 px-2.5 sm:px-3 py-1.5 rounded-lg border border-emerald-500/10 shadow-sm shrink-0">
                                     <Settings className="w-3.5 h-3.5" /> Kriteria
@@ -757,14 +772,25 @@ export function HarvestClient({
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div>
-                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Batas Bobot Minimal (kg)</label>
-                                <input 
-                                    type="number" 
-                                    value={tempMinWeight}
-                                    onChange={(e) => setTempMinWeight(e.target.value)}
-                                    className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 transition-all font-bold"
-                                />
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Batas Bobot Domba (kg)</label>
+                                    <input 
+                                        type="number" 
+                                        value={tempMinWeightDomba}
+                                        onChange={(e) => setTempMinWeightDomba(e.target.value)}
+                                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 transition-all font-bold"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Batas Bobot Kambing (kg)</label>
+                                    <input 
+                                        type="number" 
+                                        value={tempMinWeightKambing}
+                                        onChange={(e) => setTempMinWeightKambing(e.target.value)}
+                                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-emerald-500 transition-all font-bold"
+                                    />
+                                </div>
                             </div>
                             <button onClick={handleSaveCriteria} className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-md shadow-emerald-500/20 transition-all">
                                 Simpan Kriteria

@@ -35,16 +35,19 @@ export default async function LivestockPage() {
     }
 
     // Calculations for bottom stats
-    const totalAnimals = livestocks.length;
-    const healthyCount = livestocks.filter(l => l.status === 'healthy').length;
+    const activeLivestocks = livestocks.filter(l => l.status !== 'sold');
+    const soldCount = livestocks.filter(l => l.status === 'sold').length;
+    
+    const totalAnimals = activeLivestocks.length;
+    const healthyCount = activeLivestocks.filter(l => l.status === 'healthy').length;
     const healthyPercentage = totalAnimals > 0 ? Math.round((healthyCount / totalAnimals) * 100) : 0;
 
     // Average weight
-    const totalWeight = livestocks.reduce((sum, l) => sum + (l.current_weight || 0), 0);
+    const totalWeight = activeLivestocks.reduce((sum, l) => sum + (l.current_weight || 0), 0);
     const avgWeight = totalAnimals > 0 ? (totalWeight / totalAnimals).toFixed(1) : "0";
 
     // Siap Panen (e.g. weight >= 35 kg rule of thumb)
-    const readyToHarvest = livestocks.filter(l => l.current_weight >= 35).length;
+    const readyToHarvest = activeLivestocks.filter(l => l.current_weight >= 35).length;
 
     // Fetch medicine/obat items for the edit form dropdown
     const { data: medicines } = await supabase
@@ -60,7 +63,7 @@ export default async function LivestockPage() {
             medicines={medicines || []}
             avatarUrl={avatarUrl}
             userName={userName}
-            stats={{ totalAnimals, healthyPercentage, avgWeight, readyToHarvest }}
+            stats={{ totalAnimals, healthyPercentage, avgWeight, readyToHarvest, soldCount }}
         />
     )
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Play, CheckCircle2, MapPin, Mail, Phone, Activity, LineChart, Smartphone, ArrowRight, QrCode, TrendingUp, ClipboardList, LayoutDashboard, UserCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ScrollReveal } from "@/components/scroll-reveal";
@@ -36,7 +37,7 @@ export default async function LandingPage() {
             </nav>
 
             {/* HERO */}
-            <section className="relative min-h-[100dvh] lg:min-h-[700px] max-h-[1080px] overflow-hidden flex flex-col">
+            <section className="relative min-h-[100dvh] overflow-hidden flex flex-col">
                 {/* Background Image */}
                 <div className="absolute inset-0">
                     <img src="/assets/image/bg-landingpage.webp" alt="" className="w-full h-full object-cover" />
@@ -58,12 +59,6 @@ export default async function LandingPage() {
                             <Link href="/register" className="px-8 py-4 bg-[#054431] hover:bg-[#065a40] text-white rounded-full font-bold text-sm transition shadow-xl shadow-black/20">
                                 Mulai Sekarang
                             </Link>
-                            <button className="flex items-center gap-3 group">
-                                <span className="w-10 h-10 rounded-full border-2 border-white/40 flex items-center justify-center group-hover:border-white/70 transition">
-                                    <Play className="w-3.5 h-3.5 fill-white/90 text-white/90" />
-                                </span>
-                                <span className="text-white/90 font-medium text-sm">Watch Demo</span>
-                            </button>
                         </div>
                     </ScrollReveal>
 
@@ -78,11 +73,6 @@ export default async function LandingPage() {
                             <div className="text-center">
                                 <p className="text-2xl font-bold text-white">98%</p>
                                 <p className="text-xs text-white/50">ADG Accuracy</p>
-                            </div>
-                            <div className="w-px h-8 bg-white/20"></div>
-                            <div className="text-center">
-                                <p className="text-2xl font-bold text-white">12</p>
-                                <p className="text-xs text-white/50">Active Pens</p>
                             </div>
                         </div>
                     </ScrollReveal>
@@ -202,21 +192,21 @@ export default async function LandingPage() {
                                 quote: "SheepStock mengubah cara saya melihat ternak. Dulu hanya perasaan, sekarang semuanya berdasarkan data akurat.",
                                 name: "Alif Baha",
                                 role: "Peternak Mandiri, Bogor",
-                                img: "https://randomuser.me/api/portraits/men/32.jpg",
+                                img: "/assets/image/Alif.png",
                                 stars: 5,
                             },
                             {
                                 quote: "Fitur pelacakan QR sangat membantu kami mengidentifikasi ternak secara cepat. Efisiensi operasional naik drastis.",
                                 name: "Aldenara",
                                 role: "Manajer Peternakan, Bandung",
-                                img: "https://randomuser.me/api/portraits/men/45.jpg",
+                                img: "/assets/image/Alden.jpeg",
                                 stars: 5,
                             },
                             {
                                 quote: "Dashboard real-time membantu saya memantau kesehatan ternak dari mana saja. Sangat direkomendasikan!",
                                 name: "Naufal Riyadi",
                                 role: "Owner CV Ternak Jaya, Surabaya",
-                                img: "https://randomuser.me/api/portraits/men/78.jpg",
+                                img: "/assets/image/Nopil.jpeg",
                                 stars: 5,
                             },
                         ].map((t, i) => (
@@ -229,7 +219,7 @@ export default async function LandingPage() {
                                 <p className="text-sm text-slate-600 leading-relaxed mb-6 flex-1">&ldquo;{t.quote}&rdquo;</p>
                                 {/* Author */}
                                 <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                                    <img src={t.img} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
+                                    <Image src={t.img} alt={t.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover" />
                                     <div>
                                         <p className="text-sm font-bold text-slate-900">{t.name}</p>
                                         <p className="text-xs text-slate-400">{t.role}</p>
@@ -370,7 +360,7 @@ export default async function LandingPage() {
                                     "Manajemen Ternak",
                                     "Pelacakan QR Code",
                                     "Analitik Kesehatan",
-                                    "Manajemen Pakan",
+                                    "Gudang",
                                 ].map((item) => (
                                     <li key={item}>
                                         <span className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200 cursor-default">{item}</span>

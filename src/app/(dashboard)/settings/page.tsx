@@ -186,7 +186,7 @@ export default function SettingsPage() {
                                     <User className="text-emerald-500 w-5 h-5" />
                                     <div>
                                         <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Profil Pengguna</h3>
-                                        <p className="text-sm text-slate-500">Informasi akun staf yang sedang login.</p>
+                                        <p className="text-sm text-slate-500">Informasi akun yang sedang login.</p>
                                     </div>
                                 </div>
                                 {!isEditingProfile ? (
@@ -263,7 +263,7 @@ export default function SettingsPage() {
                                         <p className="inline-flex px-3 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-sm rounded-lg">{userRole}</p>
                                     </div>
                                     <div className="sm:col-span-2">
-                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Alamat Email (Supabase Auth)</label>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Alamat Email</label>
                                         <p className="font-semibold text-slate-800 dark:text-slate-200">{userEmail}</p>
                                     </div>
                                 </div>
@@ -332,7 +332,7 @@ export default function SettingsPage() {
                                 <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-purple-500/20 rounded-3xl p-4 sm:p-6 glass-card flex flex-col justify-between gap-4 h-full">
                                     <div>
                                         <h3 className="text-base font-bold text-slate-800 dark:text-slate-100">Manajemen Pegawai</h3>
-                                        <p className="text-sm text-slate-500 mt-1">Kelola hak akses dan peran (role) dari akun staff Anda.</p>
+                                        <p className="text-sm text-slate-500 mt-1">Kelola hak akses dan peran dari akun staff Anda.</p>
                                     </div>
                                     <div className="flex justify-end mt-4">
                                         <a

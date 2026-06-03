@@ -139,8 +139,12 @@ export function HealthClient({
                 setConfirmDialog(null)
                 startTransition(async () => {
                     try {
-                        await deleteHealthRecord(id)
-                        setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Catatan berhasil dihapus!" })
+                        const res = await deleteHealthRecord(id)
+                        if (res && res.error) {
+                            setErrorDialog({ isOpen: true, title: "Gagal", message: res.error })
+                        } else {
+                            setSuccessDialog({ isOpen: true, title: "Berhasil", message: "Catatan berhasil dihapus!" })
+                        }
                     } catch (err: any) {
                         setErrorDialog({ isOpen: true, title: "Gagal", message: err.message || "Gagal menghapus" })
                     }
@@ -256,7 +260,7 @@ export function HealthClient({
                                             {record.resolved_at ? (
                                                 <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">Selesai {new Date(record.resolved_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}</span>
                                             ) : (
-                                                <span className="text-[10px] text-rose-500 font-bold animate-pulse">Aktif</span>
+                                                <span className="text-[10px] text-rose-500 font-bold">Aktif</span>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -266,8 +270,10 @@ export function HealthClient({
                                             <button onClick={() => {
                                                 setEditRecord(record)
                                                 setSelectedStatus(record.status || "pemulihan")
-                                                setSelectedKeluhan(record.illness_description)
-                                                setSelectedDiagnosa(record.treatment)
+                                                const knownKeluhan = ["Tidak mau makan, nafsu makan menurun", "Lemas, tidak aktif bergerak", "Demam tinggi, suhu tubuh naik", "Diare / mencret", "Kembung, perut membesar", "Batuk, pilek, bersin", "Mata berair, bengkak", "Luka pada kulit atau kaki", "Bulu rontok, kulit bersisik", "Pincang, sulit berjalan", "Cacingan, terlihat cacing pada feses", "Kutu / parasit eksternal"];
+                                                setSelectedKeluhan(knownKeluhan.includes(record.illness_description) ? record.illness_description : "__lainnya__")
+                                                const knownDiagnosa = ["Pemberian obat cacing (deworming)", "Pemberian antibiotik", "Pemberian vitamin dan suplemen", "Vaksinasi", "Pembersihan dan perawatan luka", "Pemberian obat diare / anti mencret", "Pemandian anti parasit (dipping)", "Pemotongan kuku / perawatan kaki", "Isolasi / karantina untuk observasi", "Pemberian cairan infus / rehidrasi", "Konsultasi dengan dokter hewan"];
+                                                setSelectedDiagnosa(knownDiagnosa.includes(record.treatment) ? record.treatment : "__lainnya__")
                                             }} className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer p-1" title="Edit">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
                                             </button>
@@ -312,7 +318,7 @@ export function HealthClient({
                                                         {new Date(record.resolved_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: '2-digit' })}
                                                     </span>
                                                 ) : (
-                                                    <span className="text-[10px] text-rose-500 font-bold animate-pulse">Aktif</span>
+                                                    <span className="text-[10px] text-rose-500 font-bold">Aktif</span>
                                                 )}
                                             </td>
                                             <td className="px-3 py-3">
@@ -349,8 +355,10 @@ export function HealthClient({
                                                     <button onClick={() => {
                                                         setEditRecord(record)
                                                         setSelectedStatus(record.status || "pemulihan")
-                                                        setSelectedKeluhan(record.illness_description)
-                                                        setSelectedDiagnosa(record.treatment)
+                                                        const knownKeluhan = ["Tidak mau makan, nafsu makan menurun", "Lemas, tidak aktif bergerak", "Demam tinggi, suhu tubuh naik", "Diare / mencret", "Kembung, perut membesar", "Batuk, pilek, bersin", "Mata berair, bengkak", "Luka pada kulit atau kaki", "Bulu rontok, kulit bersisik", "Pincang, sulit berjalan", "Cacingan, terlihat cacing pada feses", "Kutu / parasit eksternal"];
+                                                        setSelectedKeluhan(knownKeluhan.includes(record.illness_description) ? record.illness_description : "__lainnya__")
+                                                        const knownDiagnosa = ["Pemberian obat cacing (deworming)", "Pemberian antibiotik", "Pemberian vitamin dan suplemen", "Vaksinasi", "Pembersihan dan perawatan luka", "Pemberian obat diare / anti mencret", "Pemandian anti parasit (dipping)", "Pemotongan kuku / perawatan kaki", "Isolasi / karantina untuk observasi", "Pemberian cairan infus / rehidrasi", "Konsultasi dengan dokter hewan"];
+                                                        setSelectedDiagnosa(knownDiagnosa.includes(record.treatment) ? record.treatment : "__lainnya__")
                                                     }} className="text-slate-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors cursor-pointer" title="Edit">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
                                                     </button>
@@ -517,13 +525,80 @@ export function HealthClient({
                             </button>
                         </div>
                         <form onSubmit={handleEditSubmit} className="p-6 overflow-y-auto flex-1 space-y-5">
+                            {error && (
+                                <div className="p-3 text-sm text-red-600 bg-red-50 rounded-xl flex items-center gap-2 border border-red-100 mb-4">
+                                    <AlertCircle className="w-4 h-4 shrink-0" />{error}
+                                </div>
+                            )}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="opacity-70 pointer-events-none">
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Ternak (ID)</label>
+                                    <input type="text" readOnly value={`${editRecord.livestocks?.qr_code} (${editRecord.livestocks?.type})`} className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-sm font-semibold" />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal *</label>
+                                    <input required name="date" type="date" defaultValue={editRecord.date ? new Date(editRecord.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                </div>
+                            </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Keluhan / Gejala *</label>
-                                <textarea required name="illness_description" value={selectedKeluhan} onChange={e => setSelectedKeluhan(e.target.value)} rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none" />
+                                <select value={selectedKeluhan} onChange={e => setSelectedKeluhan(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer mb-2">
+                                    <option value="">Pilih gejala...</option>
+                                    <option value="Tidak mau makan, nafsu makan menurun">Tidak mau makan / nafsu makan menurun</option>
+                                    <option value="Lemas, tidak aktif bergerak">Lemas, tidak aktif bergerak</option>
+                                    <option value="Demam tinggi, suhu tubuh naik">Demam tinggi</option>
+                                    <option value="Diare / mencret">Diare / mencret</option>
+                                    <option value="Kembung, perut membesar">Kembung, perut membesar</option>
+                                    <option value="Batuk, pilek, bersin">Batuk / pilek / bersin</option>
+                                    <option value="Mata berair, bengkak">Mata berair / bengkak</option>
+                                    <option value="Luka pada kulit atau kaki">Luka pada kulit / kaki</option>
+                                    <option value="Bulu rontok, kulit bersisik">Bulu rontok / kulit bersisik</option>
+                                    <option value="Pincang, sulit berjalan">Pincang, sulit berjalan</option>
+                                    <option value="Cacingan, terlihat cacing pada feses">Cacingan</option>
+                                    <option value="Kutu / parasit eksternal">Kutu / parasit eksternal</option>
+                                    <option value="__lainnya__">Lainnya (tulis sendiri)</option>
+                                </select>
+                                {selectedKeluhan === "__lainnya__" ? (
+                                    <textarea required name="illness_description" defaultValue={editRecord.illness_description} rows={2} placeholder="Tulis gejala/keluhan di sini..." className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none" />
+                                ) : (
+                                    <input type="hidden" name="illness_description" value={selectedKeluhan} />
+                                )}
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Diagnosa & Tindakan *</label>
-                                <textarea required name="treatment" value={selectedDiagnosa} onChange={e => setSelectedDiagnosa(e.target.value)} rows={2} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none" />
+                                <select value={selectedDiagnosa} onChange={e => setSelectedDiagnosa(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer mb-2">
+                                    <option value="">Pilih tindakan...</option>
+                                    <option value="Pemberian obat cacing (deworming)">Pemberian obat cacing</option>
+                                    <option value="Pemberian antibiotik">Pemberian antibiotik</option>
+                                    <option value="Pemberian vitamin dan suplemen">Pemberian vitamin & suplemen</option>
+                                    <option value="Vaksinasi">Vaksinasi</option>
+                                    <option value="Pembersihan dan perawatan luka">Perawatan luka</option>
+                                    <option value="Pemberian obat diare / anti mencret">Pemberian obat diare</option>
+                                    <option value="Pemandian anti parasit (dipping)">Pemandian anti parasit (dipping)</option>
+                                    <option value="Pemotongan kuku / perawatan kaki">Pemotongan kuku / perawatan kaki</option>
+                                    <option value="Isolasi / karantina untuk observasi">Isolasi / karantina</option>
+                                    <option value="Pemberian cairan infus / rehidrasi">Rehidrasi / infus</option>
+                                    <option value="Konsultasi dengan dokter hewan">Konsultasi dokter hewan</option>
+                                    <option value="__lainnya__">Lainnya (tulis sendiri)</option>
+                                </select>
+                                {selectedDiagnosa === "__lainnya__" ? (
+                                    <textarea required name="treatment" defaultValue={editRecord.treatment} rows={2} placeholder="Tulis diagnosa & tindakan di sini..." className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm resize-none" />
+                                ) : (
+                                    <input type="hidden" name="treatment" value={selectedDiagnosa} />
+                                )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Obat (Opsional)</label>
+                                    <select name="medicine_id" defaultValue={editRecord.item_used_id || ""} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="">Tanpa Obat</option>
+                                        {medicines.map((m: any) => <option key={m.id} value={m.id}>{m.name} (Stok: {m.current_stock} {m.unit})</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jumlah Obat</label>
+                                    <input name="medicine_qty" type="number" step="0.1" min="0" defaultValue={editRecord.medicine_qty || ""} placeholder="0" className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-sm" />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Status *</label>
@@ -533,6 +608,16 @@ export function HealthClient({
                                     <option value="selesai">Selesai</option>
                                 </select>
                             </div>
+                            {selectedStatus === "karantina" && (
+                                <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl space-y-2">
+                                    <label className="block text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider">Pindah ke Kandang Karantina? (Opsional)</label>
+                                    <select name="quarantine_cage_id" defaultValue={editRecord.livestocks?.cage_id || ""} className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-rose-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-rose-500 outline-none text-sm appearance-none cursor-pointer">
+                                        <option value="">Tetap di kandang saat ini</option>
+                                        {cages.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    </select>
+                                    <p className="text-[10px] text-rose-400 dark:text-rose-500">Pilih kandang tujuan jika ternak perlu diisolasi.</p>
+                                </div>
+                            )}
                             {selectedStatus === "selesai" && (
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Tanggal Selesai (Opsional)</label>
