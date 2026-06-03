@@ -22,7 +22,7 @@ export function UsersClient({
 }) {
     const [isPending, startTransition] = useTransition()
     const [copied, setCopied] = useState(false)
-    
+
     // Add Staff Modal State
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [newStaffForm, setNewStaffForm] = useState({
@@ -47,14 +47,14 @@ export function UsersClient({
     }
 
     const handleRoleChange = (userId: string, currentRole: string, newRole: string, name: string) => {
-        let actionName = newRole === 'admin' 
-            ? 'Promote ke Admin' 
-            : newRole === 'staff' 
-                ? 'Jadikan Staff' 
-                : newRole === 'inactive' 
-                    ? 'Nonaktifkan Akun' 
+        let actionName = newRole === 'admin'
+            ? 'Promote ke Admin'
+            : newRole === 'staff'
+                ? 'Jadikan Staff'
+                : newRole === 'inactive'
+                    ? 'Nonaktifkan Akun'
                     : 'Setujui Pendaftaran'
-        
+
         setConfirmDialog({
             isOpen: true,
             title: `Konfirmasi ${actionName}`,
@@ -151,7 +151,7 @@ export function UsersClient({
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
                 <div className="max-w-6xl mx-auto space-y-8">
-                    
+
                     {/* Referral Panel (Only for Owners) */}
                     {referralCode && (
                         <div className="bg-gradient-to-r from-emerald-800 to-[#003B26] text-white rounded-3xl p-6 shadow-xl border border-emerald-500/20 relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -166,7 +166,7 @@ export function UsersClient({
                                     <p className="text-[10px] uppercase font-bold text-[#BDF525] tracking-widest leading-none">KODE REFERRAL</p>
                                     <p className="text-lg font-extrabold tracking-wider font-mono">{referralCode}</p>
                                 </div>
-                                <button 
+                                <button
                                     onClick={handleCopy}
                                     className="p-3 bg-white/20 hover:bg-white/30 text-white rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                                 >
@@ -427,7 +427,7 @@ export function UsersClient({
                                         {addError}
                                     </div>
                                 )}
-                                
+
                                 <div className="space-y-1.5">
                                     <label htmlFor="staffName" className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wide ml-1">
                                         Nama Lengkap*
@@ -437,7 +437,7 @@ export function UsersClient({
                                         <Input
                                             id="staffName"
                                             value={newStaffForm.name}
-                                            onChange={e => setNewStaffForm({...newStaffForm, name: e.target.value})}
+                                            onChange={e => setNewStaffForm({ ...newStaffForm, name: e.target.value })}
                                             type="text"
                                             placeholder="Nama Lengkap Staf"
                                             required
@@ -455,7 +455,7 @@ export function UsersClient({
                                         <Input
                                             id="staffEmail"
                                             value={newStaffForm.email}
-                                            onChange={e => setNewStaffForm({...newStaffForm, email: e.target.value})}
+                                            onChange={e => setNewStaffForm({ ...newStaffForm, email: e.target.value })}
                                             type="email"
                                             placeholder="staf@domain.com"
                                             required
@@ -473,7 +473,7 @@ export function UsersClient({
                                         <Input
                                             id="staffPhone"
                                             value={newStaffForm.phone}
-                                            onChange={e => setNewStaffForm({...newStaffForm, phone: e.target.value})}
+                                            onChange={e => setNewStaffForm({ ...newStaffForm, phone: e.target.value })}
                                             type="tel"
                                             placeholder="0812XXXXXXXX"
                                             className="h-[44px] bg-[#EBEFEF] pl-10 pr-4 border-0 rounded-xl text-sm text-black placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-[#024431]"
@@ -490,7 +490,7 @@ export function UsersClient({
                                         <Input
                                             id="staffPass"
                                             value={newStaffForm.password}
-                                            onChange={e => setNewStaffForm({...newStaffForm, password: e.target.value})}
+                                            onChange={e => setNewStaffForm({ ...newStaffForm, password: e.target.value })}
                                             type="text"
                                             placeholder="Min. 6 Karakter"
                                             required

@@ -59,7 +59,7 @@ export function RegisterForm({
       {/* Left Side: Editorial Content Shell */}
       <div className="relative hidden lg:flex flex-col justify-center p-8 lg:p-12 overflow-hidden bg-zinc-900">
         {/* Background Image Placeholder */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url('/assets/image/background-login.webp')` }}
         />
@@ -80,12 +80,12 @@ export function RegisterForm({
           <h2 className="text-[#BDF525] text-2xl font-bold mb-3 tracking-wide font-sans">
             SheepStock
           </h2>
-          
+
           {/* Main Headline */}
           <h1 className="text-white text-4xl lg:text-5xl leading-[1.15] font-bold mb-4 font-sans">
-            Keamanan Data<br/>Terjamin
+            Keamanan Data<br />Terjamin
           </h1>
-          
+
           {/* Description */}
           <p className="text-white/90 text-sm font-medium leading-relaxed font-sans mb-8 max-w-[480px]">
             Infrastruktur digital kami dibangun untuk menjaga privasi dan integritas data peternakan Anda dengan standar enkripsi militer.
@@ -130,8 +130,8 @@ export function RegisterForm({
                 onClick={() => setRole('owner')}
                 className={cn(
                   "flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer",
-                  role === 'owner' 
-                    ? "bg-[#003B26] text-white shadow-sm" 
+                  role === 'owner'
+                    ? "bg-[#003B26] text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-200"
                 )}
               >
@@ -142,8 +142,8 @@ export function RegisterForm({
                 onClick={() => setRole('staff')}
                 className={cn(
                   "flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer",
-                  role === 'staff' 
-                    ? "bg-[#003B26] text-white shadow-sm" 
+                  role === 'staff'
+                    ? "bg-[#003B26] text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-200"
                 )}
               >
@@ -210,8 +210,8 @@ export function RegisterForm({
                   required
                   className="h-[44px] bg-[#EBEFEF] border-0 rounded-xl pl-4 pr-10 text-sm text-black placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-[#024431]"
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-black/40 hover:text-black/60 focus:outline-none cursor-pointer"
                 >
@@ -243,8 +243,8 @@ export function RegisterForm({
                   required
                   className="h-[44px] bg-[#EBEFEF] border-0 rounded-xl pl-4 pr-10 text-sm text-black placeholder:text-black/40 focus-visible:ring-2 focus-visible:ring-[#024431]"
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-black/40 hover:text-black/60 focus:outline-none cursor-pointer"
                 >
@@ -264,15 +264,15 @@ export function RegisterForm({
             </div>
 
             <div className="flex justify-center mt-2">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isPending}
                 className="h-[42px] w-[240px] rounded-full bg-[#003B26] hover:bg-[#002F1D] text-white text-sm font-bold shadow-sm font-sans transition-all cursor-pointer"
               >
                 {isPending ? "Memproses..." : "Buat Akun"}
               </Button>
             </div>
-            
+
             <div className="flex justify-center items-center gap-1 mt-4">
               <span className="text-[#1E1E1E]/80 text-xs font-sans">
                 Sudah punya akun?

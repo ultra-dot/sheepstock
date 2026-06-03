@@ -49,7 +49,7 @@ export default async function LandingPage() {
                 <div className="relative z-10 flex-1 flex flex-col justify-end pt-28 pb-10 md:pb-14 w-full max-w-[1400px] mx-auto px-6 md:px-12 lg:px-16">
                     <ScrollReveal direction="up" delay={100}>
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[4rem] xl:text-[5.2rem] font-semibold text-white leading-[1.05] mb-6 md:mb-8 max-w-4xl" style={{ fontFamily: "'Poppins', sans-serif", textShadow: '0 4px 4px rgba(0,0,0,0.25)' }}>
-                            Digitalisasi<br/>Peternakan Anda<br/>Dengan<br/>
+                            Digitalisasi<br />Peternakan Anda<br />Dengan<br />
                             <span style={{ backgroundImage: 'linear-gradient(90deg, #054431 0%, #0DAA7B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>SheepStock</span>
                         </h1>
                     </ScrollReveal>
@@ -94,7 +94,7 @@ export default async function LandingPage() {
                                 { icon: QrCode, title: "Pelacakan Ternak Kode QR", desc: "Identitas digital unik untuk setiap individu ternak dalam satu pindaian." },
                                 { icon: TrendingUp, title: "Pelacakan Penggemukan & ADG", desc: "Pantau rata-rata pertambahan berat harian secara presisi dan otomatis." },
                                 { icon: ClipboardList, title: "Log Operasional", desc: "Pencatatan riwayat pakan, vaksinasi, dan mutasi tanpa celah manipulasi." },
-                                { icon: LayoutDashboard, title: "Dashboard Real-time", desc: "Visualisasi kesehatan bisnis peternakan Anda kapan saja dan di mana saja." },
+                                { icon: LayoutDashboard, title: "Dashboard Analitik", desc: "Visualisasi kesehatan bisnis peternakan Anda kapan saja dan di mana saja." },
                             ].map((f, i) => (
                                 <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 hover:border-emerald-300 transition hover:shadow-md">
                                     <div className="w-8 h-8 bg-emerald-800 text-white rounded-lg flex items-center justify-center mb-2"><f.icon className="w-4 h-4" /></div>
@@ -142,7 +142,7 @@ export default async function LandingPage() {
                         <p className="text-sm text-slate-400 mb-6">Ideal untuk pemula dan peternak hobi.</p>
                         <div className="flex items-baseline gap-1 mb-6"><span className="text-3xl font-extrabold text-slate-900" style={{ fontFamily: "'Poppins', sans-serif" }}>IDR 0</span><span className="text-sm text-slate-400"> / Selamanya</span></div>
                         <ul className="space-y-3 mb-6 flex-1 text-sm text-slate-600">
-                            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Hingga 5 ekor ternak</li>
+                            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Hingga 40 ekor ternak</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Pencatatan dasar</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" /> Dukungan komunitas</li>
                         </ul>
@@ -155,7 +155,7 @@ export default async function LandingPage() {
                         <p className="text-sm text-emerald-50/70 mb-6">Solusi lengkap untuk peternak ambisius.</p>
                         <div className="flex items-baseline gap-1 mb-6"><span className="text-2xl sm:text-3xl lg:text-xl xl:text-3xl font-extrabold text-white leading-none tracking-tight whitespace-nowrap" style={{ fontFamily: "'Poppins', sans-serif" }}>IDR 150.000</span><span className="text-sm text-emerald-50/70 whitespace-nowrap"> / Bulan</span></div>
                         <ul className="space-y-3 mb-6 flex-1 text-sm text-emerald-50/90">
-                            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Hingga 100 ekor ternak</li>
+                            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Hingga 200 ekor ternak</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Analitik kesehatan AI</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Pelacakan QR Code</li>
                             <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-[#C5FF33] shrink-0" /> Dukungan Prioritas 24/7</li>
@@ -203,7 +203,7 @@ export default async function LandingPage() {
                                 stars: 5,
                             },
                             {
-                                quote: "Dashboard real-time membantu saya memantau kesehatan ternak dari mana saja. Sangat direkomendasikan!",
+                                quote: "Dashboard analitik membantu saya memantau kesehatan ternak dari mana saja. Sangat direkomendasikan!",
                                 name: "Naufal Riyadi",
                                 role: "Owner CV Ternak Jaya, Surabaya",
                                 img: "/assets/image/Nopil.jpeg",
@@ -212,9 +212,9 @@ export default async function LandingPage() {
                         ].map((t, i) => (
                             <ScrollReveal key={i} direction="up" delay={(i + 1) * 200} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col">
                                 {/* Quote icon */}
-                                <svg className="w-8 h-8 text-emerald-100 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+                                <svg className="w-8 h-8 text-emerald-100 mb-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" /></svg>
                                 {/* Stars */}
-                                <div className="flex gap-0.5 mb-3">{Array.from({length: t.stars}).map((_, j) => <svg key={j} className="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>)}</div>
+                                <div className="flex gap-0.5 mb-3">{Array.from({ length: t.stars }).map((_, j) => <svg key={j} className="w-3.5 h-3.5 text-amber-400 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>)}</div>
                                 {/* Quote */}
                                 <p className="text-sm text-slate-600 leading-relaxed mb-6 flex-1">&ldquo;{t.quote}&rdquo;</p>
                                 {/* Author */}
@@ -333,41 +333,41 @@ export default async function LandingPage() {
 
                         {/* Navigasi + Produk — 2 columns on mobile */}
                         <div className="grid grid-cols-2 sm:contents gap-8">
-                        {/* Quick Links */}
-                        <div>
-                            <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Navigasi</h4>
-                            <ul className="space-y-3">
-                                {[
-                                    { label: "Beranda", href: "#" },
-                                    { label: "Fitur", href: "#fitur" },
-                                    { label: "Harga", href: "#harga" },
-                                    { label: "Tentang Kami", href: "#tentang" },
-                                    { label: "Kontak", href: "#kontak" },
-                                ].map((link) => (
-                                    <li key={link.label}>
-                                        <a href={link.href} className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200">{link.label}</a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                            {/* Quick Links */}
+                            <div>
+                                <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Navigasi</h4>
+                                <ul className="space-y-3">
+                                    {[
+                                        { label: "Beranda", href: "#" },
+                                        { label: "Fitur", href: "#fitur" },
+                                        { label: "Harga", href: "#harga" },
+                                        { label: "Tentang Kami", href: "#tentang" },
+                                        { label: "Kontak", href: "#kontak" },
+                                    ].map((link) => (
+                                        <li key={link.label}>
+                                            <a href={link.href} className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200">{link.label}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                        {/* Product */}
-                        <div>
-                            <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Produk</h4>
-                            <ul className="space-y-3">
-                                {[
-                                    "Dashboard",
-                                    "Manajemen Ternak",
-                                    "Pelacakan QR Code",
-                                    "Analitik Kesehatan",
-                                    "Gudang",
-                                ].map((item) => (
-                                    <li key={item}>
-                                        <span className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200 cursor-default">{item}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                            {/* Product */}
+                            <div>
+                                <h4 className="text-xs font-bold text-white/70 uppercase tracking-widest mb-5">Produk</h4>
+                                <ul className="space-y-3">
+                                    {[
+                                        "Dashboard",
+                                        "Manajemen Ternak",
+                                        "Pelacakan QR Code",
+                                        "Analitik Kesehatan",
+                                        "Gudang",
+                                    ].map((item) => (
+                                        <li key={item}>
+                                            <span className="text-sm text-white/35 hover:text-emerald-400 transition-colors duration-200 cursor-default">{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
 
                         {/* Contact */}
